@@ -98,7 +98,7 @@ def get_default_std_a(df, mn, se, elm, calc, getDTCmnemo):
         hlpstr = ''
         if len(df[dtc].helps):
             for l in sorted(df[dtc].helps):
-                hlpstr = hlpstr + '\t' + l + '\n'
+                hlpstr = hlpstr + '\t' + l.replace('\n', '') + '\n'
 
         DTCs = DTCs[9:]
         dtcs.append(dtc + status)
@@ -205,7 +205,7 @@ def get_default_std_b(df, mn, se, elm, calc, getDTCmnemo):
         if len(df[dtc].helps):
             for l in sorted(df[dtc].helps):
                 if l.split(':')[0] == interpretation:
-                    hlpstr = hlpstr + '\t' + l + '\n'
+                    hlpstr = hlpstr + '\t' + l.replace('\n', '') + '\n'
 
         if mod_globals.opt_verbose:
             stBits = '{0:0>8b}'.format(int(dtcStatus, 16))
@@ -280,7 +280,7 @@ def get_default_failflag(df, mn, se, elm, calc):
         hlpstr = ''
         if len(df[dtc].helps):
             for l in sorted(df[dtc].helps):
-                hlpstr = hlpstr + '\t' + l + '\n'
+                hlpstr = hlpstr + '\t' + l.replace('\n', '') + '\n'
 
         dtcs.append(dtc)
         descr[dtc] = defstr

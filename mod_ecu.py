@@ -345,7 +345,7 @@ class showDatarefGui(App):
                     lines += 1
                 if fs >= 40:
                     lines += 1
-                prelabel = TextInput(text=pyren_encode(paramName), font_size=fs, size_hint=(1, None), multiline=True, height=fs * fmn * lines, readonly=True, foreground_color=[1,1,1,1], background_color=[0,0,0,1])
+                prelabel = TextInput(text=pyren_encode(paramName), font_size=fs*0.9, size_hint=(1, None), multiline=True, height=fs * fmn * lines, readonly=True, foreground_color=[1,1,1,1], background_color=[0,0,1,1])
                 layout.add_widget(prelabel)
             else:
                 layout.add_widget(self.make_box_params(paramName, val))
