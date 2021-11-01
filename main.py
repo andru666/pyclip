@@ -142,7 +142,7 @@ class screenConfig(App):
 
     def make_box_switch(self, str1, active, callback = None):
         fs = int(Window.size[1])/(int(Window.size[0])/9)
-        label1 = Label(text=str1, halign='left', valign='middle', size_hint=(1, None), height=(fs * 2,  'dp'), font_size=(fs,  'dp'))
+        label1 = Label(text=str1, halign='left', valign='middle', size_hint=(1, None), height=(fs * 2,  'dp'), font_size=(fs*2,  'dp'))
         sw = Switch(active=active, size_hint=(1, None), height=(fs * 2,  'dp'))
         if callback:
             sw.bind(active=callback)
@@ -155,8 +155,8 @@ class screenConfig(App):
 
     def make_input(self, str1, iText):
         fs = int(Window.size[1])/(int(Window.size[0])/9)
-        label1 = Label(text=str1, halign='left', valign='middle', size_hint=(1, None), height=(fs * 2,  'dp'), font_size=(fs,  'dp'))
-        ti = TextInput(text=iText, multiline=False)
+        label1 = Label(text=str1, halign='left', valign='middle', size_hint=(1, None), height=(fs * 3,  'dp'), font_size=(fs*2,  'dp'))
+        ti = TextInput(text=iText, multiline=False, font_size=(fs,  'dp'))
         self.textInput[str1] = ti
         label1.bind(size=label1.setter('text_size'))
         glay = GridLayout(cols=2, height=(fs * 3,  'dp'), size_hint=(1, None), padding=10, spacing=10)
@@ -167,7 +167,7 @@ class screenConfig(App):
     def make_bt_device_entry(self):
         fs = int(Window.size[1])/(int(Window.size[0])/9)
         ports = get_devices()
-        label1 = Label(text='ELM port', halign='left', valign='middle', size_hint=(1, None), height=(fs,  'dp'), font_size=(fs,  'dp'))
+        label1 = Label(text='ELM port', halign='left', valign='middle', size_hint=(1, None), height=(fs,  'dp'), font_size=(fs*2,  'dp'))
         self.bt_dropdown = DropDown(size_hint=(1, None), height=(fs * 2,  'dp'))
         label1.bind(size=label1.setter('text_size'))
         glay = GridLayout(cols=2, height=(fs * 3,  'dp'), size_hint=(1, None), padding=10, spacing=10)
@@ -201,7 +201,7 @@ class screenConfig(App):
     def make_language_entry(self):
         fs = int(Window.size[1])/(int(Window.size[0])/9)
         langs = mod_zip.get_languages()
-        label1 = Label(text='Language', halign='left', valign='middle', size_hint=(1, None), height=(fs * 2,  'dp'), font_size=(fs,  'dp'))
+        label1 = Label(text='Language', halign='left', valign='middle', size_hint=(1, None), height=(fs * 2,  'dp'), font_size=(fs*2,  'dp'))
         self.lang_dropdown = DropDown(size_hint=(1, None), height=(fs,  'dp'))
         label1.bind(size=label1.setter('text_size'))
         glay = GridLayout(cols=2, height=(fs * 3,  'dp'), size_hint=(1, None), padding=10, spacing=10)
@@ -281,10 +281,10 @@ class screenConfig(App):
         fs = int(Window.size[1])/(int(Window.size[0])/9)
         layout = GridLayout(cols=1, padding=10, spacing=20, size_hint=(1.0, None))
         layout.bind(minimum_height=layout.setter('height'))
-        layout.add_widget(Label(text='PyClip (pyren)', font_size=(fs*2,  'dp'), height=(fs * 2,  'dp'), size_hint=(1, None)))
-        layout.add_widget(Label(text='Data directory : ' + mod_globals.user_data_dir, font_size=(fs,  'dp'), height=(fs * 2,  'dp'), size_hint=(1, None)))
+        layout.add_widget(Label(text='PyClip (pyren)', font_size=(fs*3,  'dp'), height=(fs * 2,  'dp'), size_hint=(1, None)))
+        layout.add_widget(Label(text='Data directory : ' + mod_globals.user_data_dir, font_size=(fs*1.5,  'dp'), height=(fs * 2,  'dp'), size_hint=(1, None)))
         get_zip()
-        layout.add_widget(Label(text='DB archive : ' + mod_globals.db_archive_file, font_size=(fs,  'dp'), height=(fs * 2,  'dp'), size_hint=(1, None)))
+        layout.add_widget(Label(text='DB archive : ' + mod_globals.db_archive_file, font_size=(fs*1.5,  'dp'), height=(fs * 2,  'dp'), size_hint=(1, None)))
         gobtn = Button(text='START', height=(fs * 5,  'dp'), size_hint=(1, None), on_press=self.finish)
         layout.add_widget(gobtn)
         layout.add_widget(self.make_bt_device_entry())
@@ -315,7 +315,7 @@ def destroy():
 def kivyScreenConfig():
     global resizeFont
     if mod_globals.os != 'android':
-        Window.size = (800, 800)
+        Window.size = (700, 800)
     else:
         if not mod_globals.screen_orient:
             set_orientation_portrait()

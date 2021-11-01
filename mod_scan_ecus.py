@@ -1,5 +1,9 @@
 #Embedded file name: /build/PyCLIP/android/app/mod_scan_ecus.py
 import kivy.base as base
+try:
+    from kivy_deps import sdl2, glew
+except:
+    pass
 from kivy.base import EventLoop
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
