@@ -361,14 +361,7 @@ class Port:
             try:
                 self.hdr = serial.Serial(self.portName, baudrate=speed, timeout=portTimeout)
             except:
-                #print 'ELM not connected or wrong COM port defined.'
                 iterator = sorted(list(list_ports.comports()))
-                #print ''
-                #print 'Available COM ports:'
-                # for port, desc, hwid in iterator:
-                    #print '%-30s \n\tdesc: %s \n\thwid: %s' % (port, desc.decode('windows-1251'), hwid)
-
-                #print ''
                 mod_globals.opt_demo = True
                 exit(2)
 
@@ -409,8 +402,6 @@ class Port:
             elif self.hdr.inWaiting():
                 byte = self.hdr.read()
         except:
-            #print '*' * 40
-            #print '*       Connection to ELM was lost'
             mod_globals.opt_demo = True
             exit(2)
 
@@ -431,8 +422,6 @@ class Port:
                 return len(data)
             return self.hdr.write(data)
         except:
-            #print '*' * 40
-            #print '*       Connection to ELM was lost'
             mod_globals.opt_demo = True
             exit(2)
 
@@ -467,7 +456,6 @@ class Port:
          57600,
          9600,
          500000]:
-            #print '\r\t\t\t\t\rChecking port speed:', s,
             sys.stdout.flush()
             self.hdr.baudrate = s
             self.hdr.flushInput()
@@ -483,22 +471,17 @@ class Port:
                 tc = time.time()
                 if '>' in self.buff:
                     mod_globals.opt_speed = s
-                    #print '\nStart COM speed: ', s
                     self.hdr.timeout = self.portTimeout
                     return
                 if tc - tb > 1:
                     break
-
-        #print '\nELM not responding'
         sys.exit()
 
     def soft_boudrate(self, boudrate):
         if mod_globals.opt_demo:
             return
         if self.portType == 1:
-            #print 'ERROR - wifi do not support changing boud rate'
             return
-        #print 'Changing baud rate to:', boudrate,
         if boudrate == 38400:
             self.write('at brd 68\r')
         elif boudrate == 57600:
@@ -524,7 +507,6 @@ class Port:
             if 'OK' in self.buff:
                 break
             if tc - tb > 1:
-                #print 'ERROR - command not supported'
                 sys.exit()
 
         self.hdr.timeout = 1
@@ -553,7 +535,6 @@ class Port:
             if 'ELM' in self.buff:
                 break
             if tc - tb > 1:
-                #print "ERROR - rate not supported. Let's go back."
                 self.hdr.timeout = self.portTimeout
                 self.hdr.baudrate = mod_globals.opt_speed
                 return
@@ -574,13 +555,9 @@ class Port:
             if '>' in self.buff:
                 break
             if tc - tb > 1:
-                #print "ERROR - something went wrong. Let's back."
                 self.hdr.timeout = self.portTimeout
                 self.hdr.baudrate = mod_globals.opt_speed
                 return
-
-        #print 'OK'
-
 
 class ELM:
     port = 0
@@ -634,27 +611,7 @@ class ELM:
 
     def __del__(self):
         if not mod_globals.opt_demo:
-            #print '*' * 40
-            #print '*       RESETTING ELM'
             self.port.write('atz\r')
-        #print '*' * 40
-        #print '* '
-        #print '*       ERRORS STATISTIC'
-        #print '* '
-        #print '* error_frame      = ', self.error_frame
-        #print '* error_bufferfull = ', self.error_bufferfull
-        #print '* error_question   = ', self.error_question
-        #print '* error_nodata     = ', self.error_nodata
-        #print '* error_timeout    = ', self.error_timeout
-        #print '* error_rx         = ', self.error_rx
-        #print '* error_can        = ', self.error_can
-        #print '*'
-        #print '*       RESPONSE TIME (Average)'
-        #print '* '
-        #print '* response_time    = ', '{0:.3f}'.format(self.response_time)
-        #print '* '
-        #print '*' * 40
-        #print self.lastMessage
 
     def clear_cache(self):
         self.rsp_cache = OrderedDict()

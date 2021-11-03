@@ -28,7 +28,6 @@ def get_zip():
     if not os.path.exists(ARCHIVE_FILE):
         return
     mod_globals.db_archive_file = ARCHIVE_FILE
-    print mod_globals.db_archive_file
     zf = zipfile.ZipFile(ARCHIVE_FILE, mode='r')
     ZIPARCHIVE = zf
     return zf

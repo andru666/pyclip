@@ -32,7 +32,6 @@ def runCommand(command, ecu, elm, param = '', cmdt = 'HEX'):
     isParam = 0
     isInputList = 0
     if len(command.scenario):
-        print 'It is scenarium. I do not support them!!!\n'
         return
     if len(command.inputlist.keys()):
         isInputList = 1
@@ -43,9 +42,6 @@ def runCommand(command, ecu, elm, param = '', cmdt = 'HEX'):
             isParam += len(service.params)
 
     if len(command.datarefs):
-        print
-        print '#' * 26, ' Current values ', '#' * 26
-        print ''
         strlst = []
         elm.clear_cache()
         for dr in command.datarefs:
@@ -57,14 +53,8 @@ def runCommand(command, ecu, elm, param = '', cmdt = 'HEX'):
                 datastr, help, csvd = get_parameter(ecu.Parameters[dr.name], ecu.Mnemonics, ecu.Services, ecu.elm, ecu.calc)
             if dr.type == 'Identification':
                 datastr, help = get_identification(ecu.Identifications[dr.name], ecu.Mnemonics, ecu.Services, ecu.elm, ecu.calc)
-            print pyren_encode(datastr)
-
-        print ''
-        print '#' * 70
-        print ''
     chosenParameter = ''
     if isInputList and param not in command.inputlist.keys():
-        print "Not valid parameter. It isn't in inputList"
         return
     summary = ''
     for si in command.serviceID:
@@ -84,13 +74,10 @@ def runCommand(command, ecu, elm, param = '', cmdt = 'HEX'):
                 chosenParameter = hex_VIN_plus_CRC(ch)
         if len(service.params) == 1:
             ostr = 'cmd:' + service.startReq + chosenParameter
-            print pyren_encode('%-35s ' % ostr),
             resp = executeService(service, elm, command.caracter, chosenParameter, False)
         elif len(service.params) == 0:
             ostr = ('cmd:' + service.startReq,)
-            print pyren_encode('%-35s ' % ostr),
             resp = executeService(service, elm, command.caracter, '', False)
-        print 'rsp:', resp
         summary = summary + resp + '\n'
 
     return summary

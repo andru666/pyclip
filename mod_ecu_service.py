@@ -116,8 +116,6 @@ def executeService(service, elm, status = [], param = '', cache = False):
 
         if flag:
             return first_rsp
-
-    print '\nSomething went wrong. Counter reached maximum value.\n'
     return first_rsp
 
 def prepareComplexRequest(request, screenDataIds):

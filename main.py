@@ -61,7 +61,6 @@ elif mod_globals.os == 'nt':
         try:
             import colorama
         except ImportError:
-            print '\n\n\n\t\t\tGive me access to the Internet for download modules\n\n\n'
             sys.exit()
 
     colorama.init()
@@ -94,18 +93,14 @@ resizeFont = False
 
 def set_orientation_landscape():
     if mod_globals.os == 'android':
-        print 'request landscape orientation'
         activity = AndroidPythonActivity.mActivity
         activity.setRequestedOrientation(AndroidActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
-        print 'landscape orientation done'
 
 
 def set_orientation_portrait():
     if mod_globals.os == 'android':
-        print 'request portrait orientation'
         activity = AndroidPythonActivity.mActivity
         activity.setRequestedOrientation(AndroidActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
-        print 'portrait orientation done'
 
 
 class screenConfig(App):
@@ -118,7 +113,6 @@ class screenConfig(App):
 
     def key_handler(self, window, keycode1, keycode2, text, modifiers):
         global resizeFont
-        print 'keycodes', keycode1, keycode2
         if resizeFont:
             return True
         if (keycode1 == 45 or keycode1 == 269) and mod_globals.fontSize > 10:
@@ -179,7 +173,6 @@ class screenConfig(App):
                 mod_globals.opt_dev_address = address
             btn = Button(text=name + '>' + address, size_hint_y=None, height=(fs * 2,  'dp'))
             btn.bind(on_release=lambda btn: self.bt_dropdown.select(btn.text))
-            # btn.bind(on_press=lambda btn: self.setBluetoothDeviceAddress(address))
             self.bt_dropdown.add_widget(btn)
 
         self.mainbutton = Button(text='Select', size_hint=(1, None), height=(fs * 2,  'dp'))
@@ -194,9 +187,6 @@ class screenConfig(App):
         setattr(self.langbutton, 'text', buttonText)
         setattr(self.langbutton, 'background_normal', '')
         setattr(self.langbutton, 'background_color', (0.345,0.345,0.345,1))
-    
-    # def setBluetoothDeviceAddress(self, address):
-    #     mod_globals.opt_dev_address = address
 
     def make_language_entry(self):
         fs = int(Window.size[1])/(int(Window.size[0])/9)
@@ -224,7 +214,6 @@ class screenConfig(App):
             self.langbutton = Button(text=txt, size_hint=(1, None), height=(fs * 2,  'dp'))
         self.langbutton.bind(on_release=self.lang_dropdown.open)
         self.lang_dropdown.bind(on_select=lambda instance, x: self.changeLangButton(x))
-        # self.lang_dropdown.select(txt)
         glay.add_widget(label1)
         glay.add_widget(self.langbutton)
         return glay
@@ -284,7 +273,7 @@ class screenConfig(App):
         layout.add_widget(Label(text='PyClip (pyren)', font_size=(fs*2,  'dp'), height=(fs * 2,  'dp'), size_hint=(1, None)))
         layout.add_widget(Label(text='Data directory : ' + mod_globals.user_data_dir, font_size=(fs,  'dp'), height=(fs*2,  'dp'), multiline=True, size_hint=(1, None)))
         get_zip()
-        layout.add_widget(Label(text='DB archive : ' + mod_globals.db_archive_file, font_size=(fs,  'dp'), height=(fs,  'dp'), multiline=True, size_hint=(1, None)))
+        layout.add_widget(Label(text='DB archive : ' + str(mod_globals.db_archive_file).rsplit('\\')[1], font_size=(fs,  'dp'), height=(fs,  'dp'), multiline=True, size_hint=(1, None)))
         gobtn = Button(text='START', height=(fs * 5,  'dp'), size_hint=(1, None), on_press=self.finish)
         layout.add_widget(gobtn)
         layout.add_widget(self.make_bt_device_entry())
@@ -347,7 +336,6 @@ def main():
     settings = mod_globals.Settings()
     kivyScreenConfig()
     settings.save()
-    print 'Opening ELM'
     elm = ELM(mod_globals.opt_port, mod_globals.opt_speed, mod_globals.opt_log)
     # try:
     #     elm = ELM(mod_globals.opt_port, mod_globals.opt_speed, mod_globals.opt_log)
@@ -371,7 +359,6 @@ def main():
     #     exit(2)
     if mod_globals.opt_speed < mod_globals.opt_rate and not mod_globals.opt_demo:
         elm.port.soft_boudrate(mod_globals.opt_rate)
-    print 'Loading ECUs list'
     se = ScanEcus(elm)
     SEFname = mod_globals.user_data_dir + '/savedEcus.p'
     if mod_globals.opt_can2:
@@ -431,10 +418,8 @@ def main():
             pickle.dump(ecu, open(ecucashfile, 'wb'))
         ecu.initELM(elm)
         if mod_globals.opt_demo:
-            print 'Loading dump'
             ecu.loadDump()
         elif mod_globals.opt_dump:
-            print 'Saving dump'
             ecu.saveDump()
         ecu.show_screens()
 

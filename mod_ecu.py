@@ -344,7 +344,6 @@ class showDatarefGui(App):
 
         tmp_label = Label(text=max_str, font_size=fs)
         tmp_label._label.render()
-        print tmp_label.text_size
         for paramName, val in params.iteritems():
             if val == 'Text':
                 layout.add_widget(Label(text=paramName, font_size=fs, height=fs * fmn, size_hint=(1, None)))
@@ -363,8 +362,6 @@ class showDatarefGui(App):
                 layout.add_widget(prelabel)
             else:
                 layout.add_widget(self.make_box_params(paramName, val))
-
-        print 'end'
         quitbutton = Button(text='<BACK>', height=fs * bmn, size_hint=(1, None), on_press=self.finish)
         layout.add_widget(quitbutton)
         root = ScrollView(size_hint=(None, None), size=Window.size, do_scroll_x=False, pos_hint={'center_x': 0.5,
@@ -405,8 +402,6 @@ class ECU():
         self.Services = {}
         self.Mnemonics = {}
         self.DataIds = {}
-        print 'Deflen:', len(self.Defaults)
-        print 'ECU type: ', cecu['stdType']
         modelid = self.ecudata['ModelId'].replace('XML', 'xml')
         mdom = mod_zip.get_xml_file(modelid)
         mdoc = mdom.documentElement
@@ -461,9 +456,7 @@ class ECU():
 
     def initELM(self, elm):
         global ecudump
-        print 'Loading PLY '
         self.calc = Calc()
-        print 'Init ELM'
         self.elm = elm
         if self.ecudata['pin'].lower() == 'can':
             self.elm.init_can()
@@ -475,8 +468,6 @@ class ECU():
         if self.ecudata['pin'].lower()=='can' and self.DataIds and mod_globals.opt_csv:
             mod_globals.opt_perform = True
             self.elm.checkModulePerformaceLevel(self.DataIds)
-        
-        print 'Done'
         ecudump = {}
 
     def saveDump(self):
@@ -742,9 +733,6 @@ class ECU():
             self.elm.clear_cache()
             if mod_globals.opt_csv and mod_globals.opt_csv_only:
                 clearScreen()
-                print 'Data is sending directly to csv-file'
-                print ''
-                print 'Press any key to exit'
             for dr in datarefs:
                 datastr = dr.name
                 help = dr.type
@@ -783,15 +771,6 @@ class ECU():
                 header = header + 'Screen : ' + path
                 H = 25
                 pages = len(strlst) / H
-                for l in strlst[page * H:(page + 1) * H]:
-                    print pyren_encode(l)
-
-                if pages > 0:
-                    print ''
-                    print '[Page ', page + 1, ' from ', pages + 1, '] Press page number to switch or any other to exit'
-                else:
-                    print ''
-                    print 'Press any key to exit'
                 if mod_globals.opt_demo:
                     self.minimumrefreshrate = 1
                 tc = time.time()
@@ -826,8 +805,6 @@ class ECU():
         while 1:
             clearScreen()
             menu = []
-            if len(function.datarefs) != 0 and len(function.subfunctions) != 0:
-                print 'Warning: both datarefs and functions not empty'
             if len(function.subfunctions) != 0:
                 for sfu in function.subfunctions:
                     menu.append(sfu.text)
@@ -845,8 +822,6 @@ class ECU():
         while 1:
             clearScreen()
             menu = []
-            if len(screen.datarefs) != 0 and len(screen.functions) != 0:
-                print 'Warning: both datarefs and functions not empty'
             if len(screen.functions) != 0:
                 for fu in screen.functions:
                     menu.append(fu.text)
@@ -882,7 +857,6 @@ class ECU():
                 mod_globals.ext_cur_DTC = '000000'
                 return
             if choice[0] == '<Clear>':
-                print 'Executing command ', self.resetDTCcommand
                 executeCommand(self.Commands[self.resetDTCcommand], self, self.elm, header)
                 return
             index = int(choice[1]) - 1
@@ -928,7 +902,6 @@ class ECU():
                 mod_globals.ext_cur_DTC = '000000'
                 return
             if choice[0] == '<Clear>':
-                print 'Executing command ', self.resetDTCcommand
                 executeCommand(self.Commands[self.resetDTCcommand], self, self.elm, header)
                 return
             index = int(choice[1]) - 1
@@ -973,7 +946,6 @@ class ECU():
             if choice[0] == '<Up>':
                 return
             if choice[0] == '<Clear>':
-                print 'Executing command ', self.resetDTCcommand
                 executeCommand(self.Commands[self.resetDTCcommand], self, self.elm, header)
                 return
             dtchex = dtcs[int(choice[1]) - 1]
@@ -1319,9 +1291,6 @@ def main():
         sys.argv.append(lanid)
         sys.argv.append('TORQ')
     if len(sys.argv) < 3:
-        print 'Usage: mod_ecu.py <ID> <language> [torq] [nochk]'
-        print 'Example:'
-        print '   mod_ecu.py 10016 RU '
         sys.exit(0)
     ecuid = sys.argv[1]
     lanid = sys.argv[2]
@@ -1335,60 +1304,21 @@ def main():
     Commands = {}
     Services = {}
     Mnemonics = {}
-    print 'Loading language '
     sys.stdout.flush()
     lang = optfile('../Location/DiagOnCAN_' + lanid + '.bqm', True)
-    print 'Done'
     sys.stdout.flush()
     mdom = mod_zip.get_xml_file('FG' + ecuid + '.xml')
     sgfile = 'SG' + ecuid + '.xml'
     mdoc = mdom.documentElement
-    print 'Loading optimyzer'
     sys.stdout.flush()
     opt_file = optfile(sgfile, False, True, True)
-    print 'Loading defaults'
     df_class = ecu_defaults(Defaults, mdoc, opt_file.dict, lang.dict)
-    print 'Loading parameters'
     pr_class = ecu_parameters(Parameters, mdoc, opt_file.dict, lang.dict)
-    print 'Loading states'
     st_class = ecu_states(States, mdoc, opt_file.dict, lang.dict)
-    print 'Loading identifications'
     id_class = ecu_identifications(Identifications, mdoc, opt_file.dict, lang.dict)
-    print 'Loading commands'
     cm_class = ecu_commands(Commands, mdoc, opt_file.dict, lang.dict)
-    print 'Loading mnemonics'
     mm_class = ecu_mnemonics(Mnemonics, mdoc, opt_file.dict, lang.dict)
     if len(sys.argv) == 3:
-        print
-        print 'Defaults'
-        print
-        for i in sorted(Defaults.keys()):
-            print pyren_encode(Defaults[i].name + '[' + i + '] ' + Defaults[i].label)
-
-        print
-        print 'Parameters'
-        print
-        for i in sorted(Parameters.keys()):
-            print pyren_encode(Parameters[i].codeMR + '[' + i + '] ' + Parameters[i].label)
-
-        print
-        print 'States'
-        print
-        for i in sorted(States.keys()):
-            print pyren_encode(States[i].codeMR + '[' + i + '] ' + States[i].label)
-
-        print
-        print 'Identifications'
-        print
-        for i in sorted(Identifications.keys()):
-            print pyren_encode(Identifications[i].codeMR + '[' + i + '] ' + Identifications[i].label)
-
-        print
-        print 'Commands'
-        print
-        for i in sorted(Commands.keys()):
-            print pyren_encode(Commands[i].codeMR + '[' + i + '] ' + Commands[i].label)
-
         sys.exit(0)
     if len(sys.argv) > 3 and sys.argv[3].upper() != 'TORQ':
         sys.exit(0)
@@ -1477,25 +1407,10 @@ def main():
         cf.write(line.encode('utf-8'))
 
     cf.close()
-    print
-    print 'File:', filename, 'created'
-    print
     can250init = 'ATAL\\nATSH' + ddd + '\\nATCRA' + sss + '\\nATFCSH' + ddd + '\\nATFCSD300000\\nATFCSM1\\nATSP8\\n' + startDiagReq
     can500init = 'ATAL\\nATSH' + ddd + '\\nATCRA' + sss + '\\nATFCSH' + ddd + '\\nATFCSD300000\\nATFCSM1\\nATSP6\\n' + startDiagReq
     slow05init = 'ATSH81' + F2A[family] + 'F1\\nATSW96\\nATIB10\\nATSP4\\nATSI\\n' + startDiagReq
     fast10init = 'ATSH81' + F2A[family] + 'F1\\nATSW96\\nATIB10\\nATSP5\\nATFI\\n' + startDiagReq
-    if len(candst) > 1:
-        print 'Init string for CAN:'
-        print can500init
-        print
-    if len(fastinit) > 1:
-        print 'Init string for Engine K-line (FAST INIT):'
-        print fast10init
-        print
-    if len(slowinit) > 1:
-        print 'Init string for Engine K-line (SLOW INIT):'
-        print slow05init
-        print
     profilename = str(int(time.time())) + '.tdv'
     if mod_globals.os == 'android' and os.path.exists('/sdcard/.torque/vehicles'):
         profilename = '/sdcard/.torque/vehicles/' + str(int(time.time())) + '.tdv'
@@ -1532,10 +1447,6 @@ def main():
         prn.write(('customInit=' + slow05init.replace('\\', '\\\\') + '\n').encode('utf-8'))
         prn.write('preferredProtocol=5\n'.encode('utf-8'))
     prn.close()
-    print
-    print 'Torque profile:', profilename, 'created'
-    print
-
 
 if __name__ == '__main__':
     main()

@@ -121,12 +121,19 @@ class Scenarii(App):
         
         #root.add_widget(TextInput(text='VF', multiline=False, size_hint=(1, None), height=40))
 
+        root.add_widget(Button(text='Прописать форсунки', on_press=self.write_inj, size_hint=(1, None), height=80))
         root.add_widget(Button(text='CANCEL', on_press=self.stop, size_hint=(1, None), height=80))
         rot = ScrollView(size_hint=(1, 1), do_scroll_x=False, pos_hint={'center_x': 0.5,
          'center_y': 0.5})
         rot.add_widget(root)
         return rot
-
+    
+    def write_vin(self):
+        root = GridLayout(cols=1)
+        self.vin_input = TextInput(text='VF', multiline=False, size_hint=(1, None), height=40)
+        root.add_widget(self.vin_input)
+        return root
+    
     def write_vin(self, instance):
         vin = self.vin_input.text.upper()
         if not (len(vin) == 17 and 'I' not in vin and 'O' not in vin):

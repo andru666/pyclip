@@ -227,7 +227,6 @@ class ScanEcus():
         self.reqres = []
         self.errres = []
         i = 0
-        print '\r\t\t\t\t\rScanning:' + str(i) + '/' + str(len(self.detectedEcus)),
         sys.stdout.flush()
         canH = '6'
         canL = '14'
@@ -238,7 +237,6 @@ class ScanEcus():
         for row in sorted(self.detectedEcus, key=lambda k: int(k['idf'])):
             if row['pin'] == 'can' and row['pin1'] == canH and row['pin2'] == canL:
                 i = i + 1
-                print '\r\t\t\t\t\rScanning:' + str(i) + '/' + str(len(self.detectedEcus)),
                 sys.stdout.flush()
                 self.elm.set_can_addr(row['dst'], row)
                 self.scan_can(row)
@@ -249,19 +247,15 @@ class ScanEcus():
             for row in sorted(self.detectedEcus, key=lambda k: int(k['idf'])):
                 if row['pin'] == 'iso' and row['pin1'] == '7' and row['pin2'] == '15':
                     i = i + 1
-                    print '\r\t\t\t\t\rScanning:' + str(i) + '/' + str(len(self.detectedEcus)),
                     sys.stdout.flush()
                     self.elm.set_iso_addr(row['dst'], row)
                     self.scan_iso(row)
-
-        print '\r\t\t\t\t\rScanning:' + str(i) + '/' + str(len(self.detectedEcus))
         self.detectedEcus = sorted(self.detectedEcus, key=lambda k: int(k['idf']))
 
     def chooseECU(self, ecuid):
         if len(self.detectedEcus) == 0:
             self.scanAllEcus()
         if len(self.detectedEcus) == 0:
-            print 'NO ECU detected. Nothing to do. ((('
             label = Label(text='No ECU detected\n nothing to do')
             popup = Popup(title='Problem', content=label, size=(400, 300), size_hint=(None, None), auto_dismiss=True, on_dismiss=exit)
             popup.open()
@@ -277,10 +271,6 @@ class ScanEcus():
 
         listecu = []
         if mod_globals.os == 'android':
-            if mod_globals.opt_scan:
-                print pyren_encode('\n     %-40s %s' % ('Name', 'Warn'))
-            else:
-                print pyren_encode('\n     %-40s %s' % ('Name', 'Type'))
             for row in self.detectedEcus:
                 if families[row['idf']] in mod_globals.language_dict.keys():
                     fmlyn = mod_globals.language_dict[families[row['idf']]]
@@ -294,10 +284,6 @@ class ScanEcus():
                     line = '%-40s %s' % (row['doc'].strip(), row['stdType'])
                 listecu.append(line)
         else:
-            if mod_globals.opt_scan:
-                print pyren_encode('\n     %-12s %-6s %-5s %-40s %s' % ('Addr', 'Family', 'Index', 'Name', 'Warn'))
-            else:
-                print pyren_encode('\n     %-12s %-6s %-5s %-40s %s' % ('Addr', 'Family', 'Index', 'Name', 'Type'))
             for row in self.detectedEcus:
                 if 'idf' not in row.keys():
                     row['idf'] = ''
@@ -596,14 +582,12 @@ class ScanEcus():
         choice = sorted(self.vhcls, key=lambda k: k[orderBy])[int(ch[1]) - 1]
         model = choice[0]
         tcomfilename = choice[1]
-        print 'Loading data for :', model, tcomfilename,
         sys.stdout.flush()
         self.allecus = OrderedDict()
         if self.elm.lf != 0:
             self.elm.lf.write('#load: ' + model + ' ' + tcomfilename + '\n')
             self.elm.lf.flush()
         self.load_model_ECUs(tcomfilename)
-        print '  - ' + str(len(self.allecus)) + ' ecus loaded'
 
     def compare_ecu(self, row, rrsp, req):
         if len(req) / 2 == 3:
@@ -875,7 +859,6 @@ def readECUIds(elm):
 def findTCOM(addr, cmd, rsp):
     ecuvhc = {}
     vehicle = ''
-    print 'Read models'
     for file in mod_zip.get_tcoms():
         vehicle = ''
         DOMTree = mod_zip.get_xml_file(file)
@@ -915,18 +898,12 @@ def findTCOM(addr, cmd, rsp):
                                 ecuvhc[ecuname] = [vehicle]
 
     se = ScanEcus(None)
-    print 'Loading Uces.xml'
     se.read_Uces_file(True)
     for r in se.allecus.keys():
         if se.allecus[r]['dst'] != addr:
             continue
         if se.allecus[r]['ids'][0] != cmd:
             continue
-        if se.compare_ecu(se.allecus[r]['ids'], rsp, cmd):
-            try:
-                print r, se.allecus[r]['doc'], se.allecus[r]['ids'], ecuvhc[r]
-            except:
-                print
 
 def generateSavedEcus(eculist, fileName):
     se = ScanEcus(0)
@@ -940,8 +917,6 @@ def generateSavedEcus(eculist, fileName):
                 se.allecus[i]['idf'] = se.allecus[i]['idf'][1]
             se.allecus[i]['pin'] = 'can'
             se.detectedEcus.append(se.allecus[i])
-
-    print se.detectedEcus
     if len(se.detectedEcus):
         pickle.dump(se.detectedEcus, open(fileName, 'wb'))
 

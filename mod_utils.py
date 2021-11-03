@@ -107,13 +107,8 @@ def ChoiceFromDict(dict, question, showId = True):
         s = dict[k]
         if k.lower() == '<up>' or k.lower() == '<exit>':
             exitNumber = c
-            print '%s - %s' % ('Q', pyren_encode(s))
             d['Q'] = k
         else:
-            if showId:
-                print '%s - (%s) %s' % (c, pyren_encode(k), pyren_encode(s))
-            else:
-                print '%s - %s' % (c, pyren_encode(s))
             d[str(c)] = k
         c = c + 1
 
@@ -121,8 +116,6 @@ def ChoiceFromDict(dict, question, showId = True):
         try:
             ch = raw_input(question)
         except (KeyboardInterrupt, SystemExit):
-            print
-            print
             sys.exit()
 
         if ch == 'q':
@@ -231,7 +224,6 @@ def getVIN(de, elm, getFirst = False):
                     l_vin.add(l.upper())
 
     if len(l_vin) == 0 and not getFirst:
-        print "ERROR!!! Can't find any VIN. Check connection"
         exit()
     if len(l_vin) < 2:
         try:
@@ -240,7 +232,6 @@ def getVIN(de, elm, getFirst = False):
             ret = ''
 
         return ret
-    print '\nFound ', len(l_vin), ' VINs\n'
     choice = Choice(l_vin, 'Choose VIN : ')
     return choice[0]
 

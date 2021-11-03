@@ -71,7 +71,6 @@ class optfile:
         while i < tb:
             if progress and i & 255 == 0:
                 pr = (i + 2 - keyoff) * 100 / (tb - keyoff)
-                print '\r[' + 'X' * (pr / 2) + ' ' * (50 - pr / 2) + '] ' + str(int(pr)) + '%',
                 sys.stdout.flush()
             lf.seek(i)
             addr = self.get_4_bytes(lf)
@@ -88,18 +87,9 @@ class optfile:
             self.dict[key] = line
             i = i + 12 + keyl * 2
 
-        if progress:
-            print '\r[' + 'X' * 50 + '] 100%',
-
-
 if __name__ == '__main__':
     os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
     if len(sys.argv) == 1:
-        print 'Usage: mod_optfile.py <filename> [key]'
-        print '       mod_optfile.py ALLSG'
-        print 'Example:'
-        print '   mod_optfile.py Location/DiagOnCan_RU.bqm'
-        print '   mod_optfile.py EcuRenault/Sessions/SG0110016.XML P001'
         sys.exit(0)
     if sys.argv[1] == 'ALLSG':
         for file in glob.glob('../EcuRenault/Sessions/*.xml'):
@@ -108,68 +98,27 @@ if __name__ == '__main__':
                 sgFileName = '../EcuRenault/Sessions/S' + file[1:]
                 ugFileName = '../EcuRenault/Sessions/U' + file[1:-4] + '.json'
                 if os.path.exists(ugFileName):
-                    print 'Skipping ', ugFileName
                     continue
                 try:
                     of = optfile(sgFileName, False, False)
                 except:
                     continue
-
-                print ugFileName
                 f = open(ugFileName, 'wt')
                 f.write(json.dumps(of.dict))
                 f.close()
-
         exit(0)
     if sys.argv[1] == 'ALLBQM':
         for file in glob.glob('../Location/*.bqm'):
-            print file
             sgFileName = mod_globals.location_dir + '/' + file
             ugFileName = mod_globals.location_dir + '/Convert/' + os.path.basename(file)[:-4] + '.json'
             of = optfile(sgFileName, False, False)
             rf = json.dumps(of.dict)
-            print ugFileName
             f = open(ugFileName, 'wt')
             f.write(rf)
             f.close()
 
         exit(0)
     of = optfile(sys.argv[1])
-    if len(sys.argv) == 2:
-        for k in sorted(of.dict.keys()):
-            print '#' * 60
-            print 'Key:', k
-            print '-' * 60
-            if of.dict[k][:1] == '<' and of.dict[k][-1:] == '>':
-                print parseString(of.dict[k]).toprettyxml(indent='  ')
-            else:
-                print of.dict[k]
-
-    of = optfile(sys.argv[1])
-    if len(sys.argv) == 2:
-        for k in sorted(of.dict.keys()):
-            print '#' * 60
-            print 'Key:', k
-            print '-' * 60
-            if of.dict[k][:1] == '<' and of.dict[k][-1:] == '>':
-                print parseString(of.dict[k]).toprettyxml(indent='  ')
-            else:
-                print of.dict[k]
 
     if len(sys.argv) == 3:
         k = sys.argv[2]
-        if k in of.dict.keys():
-            if of.dict[k][:1] == '<' and of.dict[k][-1:] == '>':
-                print parseString(of.dict[k]).toprettyxml(indent='  ')
-            else:
-                print of.dict[k]
-        else:
-            for i in sorted(of.dict.keys()):
-                if k in i:
-                    print '#' * 60
-                    print 'Key:', i
-                    print '-' * 60
-                    if of.dict[i][:1] == '<' and of.dict[i][-1:] == '>':
-                        print parseString(of.dict[i]).toprettyxml(indent='  ')
-                    else:
-                        print of.dict[i]

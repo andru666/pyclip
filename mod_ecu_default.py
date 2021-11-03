@@ -455,6 +455,4 @@ class ecu_defaults:
             Mnemo = odom.getElementsByTagName('Mnemo').item(0)
             if Mnemo:
                 extractDTCmnemo = Mnemo.getAttribute('name')
-        print 'Eraser command name :' + eraserCommandName
-        print 'DTC extractor mnemo :' + extractDTCmnemo
         return (extractDTCmnemo, eraserCommandName)

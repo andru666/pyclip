@@ -94,7 +94,6 @@ class Calc(Parser):
     t_newline.func_doc = '\\n+'
 
     def t_error(self, t):
-        print "PLY:Parser:Illegal character '%s'" % t.value[0]
         t.lexer.skip(1)
 
     precedence = (('left', 'PLUS', 'MINUS'),
@@ -281,52 +280,37 @@ class Calc(Parser):
         try:
             p[0] = self.names[p[1]]
         except LookupError:
-            print "PLY:Parser:Undefined name '%s'" % p[1]
             p[0] = 0
 
     p_expression_name.func_doc = 'expression : NAME'
-
-    def p_error(self, p):
-        print "PLY:Parser:Syntax error at '%s'" % p.value
 
 
 if __name__ == '__main__':
     tb = time.time()
     calc = Calc()
     te = time.time()
-    print 'init:' + str(te - tb)
     value = '(((_STATUSDTC&amp;0x1F)== 0x01)&amp;&amp; ((_STATUSDTC#5== 0x01)&amp;&amp;(((_STATUSDTC&amp;0x1F)== 0x01)||((_STATUSDTC&amp;0x1F)== 0x02)||((_STATUSDTC&amp;0x1F)== 0x03)||((_STATUSDTC&amp;0x9F)== 0x9F)||((_STATUSDTC&amp;0x9F)== 0x8E)||((_STATUSDTC&amp;0x9F)== 0x88)||((_STATUSDTC&amp;0x9F)== 0x89)||((_STATUSDTC&amp;0x9F)== 0x93))))?2:((((_STATUSDTC&amp;0x1F)== 0x02)&amp;&amp; ((_STATUSDTC#5== 0x01)&amp;&amp;(((_STATUSDTC&amp;0x1F)== 0x01)||((_STATUSDTC&amp;0x1F)== 0x02)||((_STATUSDTC&amp;0x1F)== 0x03)||((_STATUSDTC&amp;0x9F)== 0x9F)||((_STATUSDTC&amp;0x9F)== 0x8E)||((_STATUSDTC&amp;0x9F)== 0x88)||((_STATUSDTC&amp;0x9F)== 0x89)||((_STATUSDTC&amp;0x9F)== 0x93))))?4:((((_STATUSDTC&amp;0x1F)== 0x03)&amp;&amp; ((_STATUSDTC#5== 0x01)&amp;&amp;(((_STATUSDTC&amp;0x1F)== 0x01)||((_STATUSDTC&amp;0x1F)== 0x02)||((_STATUSDTC&amp;0x1F)== 0x03)||((_STATUSDTC&amp;0x9F)== 0x9F)||((_STATUSDTC&amp;0x9F)== 0x8E)||((_STATUSDTC&amp;0x9F)== 0x88)||((_STATUSDTC&amp;0x9F)== 0x89)||((_STATUSDTC&amp;0x9F)== 0x93))))?6:((((_STATUSDTC&amp;0x9F)== 0x9F)&amp;&amp; ((_STATUSDTC#5== 0x01)&amp;&amp;(((_STATUSDTC&amp;0x1F)== 0x01)||((_STATUSDTC&amp;0x1F)== 0x02)||((_STATUSDTC&amp;0x1F)== 0x03)||((_STATUSDTC&amp;0x9F)== 0x9F)||((_STATUSDTC&amp;0x9F)== 0x8E)||((_STATUSDTC&amp;0x9F)== 0x88)||((_STATUSDTC&amp;0x9F)== 0x89)||((_STATUSDTC&amp;0x9F)== 0x93))))?8:((((_STATUSDTC&amp;0x9F)== 0x8E)&amp;&amp; ((_STATUSDTC#5== 0x01)&amp;&amp;(((_STATUSDTC&amp;0x1F)== 0x01)||((_STATUSDTC&amp;0x1F)== 0x02)||((_STATUSDTC&amp;0x1F)== 0x03)||((_STATUSDTC&amp;0x9F)== 0x9F)||((_STATUSDTC&amp;0x9F)== 0x8E)||((_STATUSDTC&amp;0x9F)== 0x88)||((_STATUSDTC&amp;0x9F)== 0x89)||((_STATUSDTC&amp;0x9F)== 0x93))))?10:((((_STATUSDTC&amp;0x9F)== 0x89)&amp;&amp; ((_STATUSDTC#5== 0x01)&amp;&amp;(((_STATUSDTC&amp;0x1F)== 0x01)||((_STATUSDTC&amp;0x1F)== 0x02)||((_STATUSDTC&amp;0x1F)== 0x03)||((_STATUSDTC&amp;0x9F)== 0x9F)||((_STATUSDTC&amp;0x9F)== 0x8E)||((_STATUSDTC&amp;0x9F)== 0x88)||((_STATUSDTC&amp;0x9F)== 0x89)||((_STATUSDTC&amp;0x9F)== 0x93))))?14:((((_STATUSDTC&amp;0x9F)== 0x93)&amp;&amp; ((_STATUSDTC#5== 0x01)&amp;&amp;(((_STATUSDTC&amp;0x1F)== 0x01)||((_STATUSDTC&amp;0x1F)== 0x02)||((_STATUSDTC&amp;0x1F)== 0x03)||((_STATUSDTC&amp;0x9F)== 0x9F)||((_STATUSDTC&amp;0x9F)== 0x8E)||((_STATUSDTC&amp;0x9F)== 0x88)||((_STATUSDTC&amp;0x9F)== 0x89)||((_STATUSDTC&amp;0x9F)== 0x93))))?16:((((_STATUSDTC&amp;0x9F)== 0x88)&amp;&amp; ((_STATUSDTC#5== 0x01)&amp;&amp;(((_STATUSDTC&amp;0x1F)== 0x01)||((_STATUSDTC&amp;0x1F)== 0x02)||((_STATUSDTC&amp;0x1F)== 0x03)||((_STATUSDTC&amp;0x9F)== 0x9F)||((_STATUSDTC&amp;0x9F)== 0x8E)||((_STATUSDTC&amp;0x9F)== 0x88)||((_STATUSDTC&amp;0x9F)== 0x89)||((_STATUSDTC&amp;0x9F)== 0x93))))?12:((((_STATUSDTC&amp;0x1F)== 0x01)&amp;&amp; ((_STATUSDTC#6== 0x01)&amp;&amp;(((_STATUSDTC&amp;0x1F)== 0x01)||((_STATUSDTC&amp;0x1F)== 0x02)||((_STATUSDTC&amp;0x1F)== 0x03)||((_STATUSDTC&amp;0x9F)== 0x9F)||((_STATUSDTC&amp;0x9F)== 0x8E)||((_STATUSDTC&amp;0x9F)== 0x88)||((_STATUSDTC&amp;0x9F)== 0x89)||((_STATUSDTC&amp;0x9F)== 0x93))))?1:((((_STATUSDTC&amp;0x1F)== 0x02)&amp;&amp; ((_STATUSDTC#6== 0x01)&amp;&amp;(((_STATUSDTC&amp;0x1F)== 0x01)||((_STATUSDTC&amp;0x1F)== 0x02)||((_STATUSDTC&amp;0x1F)== 0x03)||((_STATUSDTC&amp;0x9F)== 0x9F)||((_STATUSDTC&amp;0x9F)== 0x8E)||((_STATUSDTC&amp;0x9F)== 0x88)||((_STATUSDTC&amp;0x9F)== 0x89)||((_STATUSDTC&amp;0x9F)== 0x93))))?3:((((_STATUSDTC&amp;0x1F)== 0x03)&amp;&amp; ((_STATUSDTC#6== 0x01)&amp;&amp;(((_STATUSDTC&amp;0x1F)== 0x01)||((_STATUSDTC&amp;0x1F)== 0x02)||((_STATUSDTC&amp;0x1F)== 0x03)||((_STATUSDTC&amp;0x9F)== 0x9F)||((_STATUSDTC&amp;0x9F)== 0x8E)||((_STATUSDTC&amp;0x9F)== 0x88)||((_STATUSDTC&amp;0x9F)== 0x89)||((_STATUSDTC&amp;0x9F)== 0x93))))?5:((((_STATUSDTC&amp;0x9F)== 0x9F)&amp;&amp; ((_STATUSDTC#6== 0x01)&amp;&amp;(((_STATUSDTC&amp;0x1F)== 0x01)||((_STATUSDTC&amp;0x1F)== 0x02)||((_STATUSDTC&amp;0x1F)== 0x03)||((_STATUSDTC&amp;0x9F)== 0x9F)||((_STATUSDTC&amp;0x9F)== 0x8E)||((_STATUSDTC&amp;0x9F)== 0x88)||((_STATUSDTC&amp;0x9F)== 0x89)||((_STATUSDTC&amp;0x9F)== 0x93))))?7:((((_STATUSDTC&amp;0x9F)== 0x8E)&amp;&amp; ((_STATUSDTC#6== 0x01)&amp;&amp;(((_STATUSDTC&amp;0x1F)== 0x01)||((_STATUSDTC&amp;0x1F)== 0x02)||((_STATUSDTC&amp;0x1F)== 0x03)||((_STATUSDTC&amp;0x9F)== 0x9F)||((_STATUSDTC&amp;0x9F)== 0x8E)||((_STATUSDTC&amp;0x9F)== 0x88)||((_STATUSDTC&amp;0x9F)== 0x89)||((_STATUSDTC&amp;0x9F)== 0x93))))?9:((((_STATUSDTC&amp;0x9F)== 0x89)&amp;&amp; ((_STATUSDTC#6== 0x01)&amp;&amp;(((_STATUSDTC&amp;0x1F)== 0x01)||((_STATUSDTC&amp;0x1F)== 0x02)||((_STATUSDTC&amp;0x1F)== 0x03)||((_STATUSDTC&amp;0x9F)== 0x9F)||((_STATUSDTC&amp;0x9F)== 0x8E)||((_STATUSDTC&amp;0x9F)== 0x88)||((_STATUSDTC&amp;0x9F)== 0x89)||((_STATUSDTC&amp;0x9F)== 0x93))))?13:((((_STATUSDTC&amp;0x9F)== 0x93)&amp;&amp; ((_STATUSDTC#6== 0x01)&amp;&amp;(((_STATUSDTC&amp;0x1F)== 0x01)||((_STATUSDTC&amp;0x1F)== 0x02)||((_STATUSDTC&amp;0x1F)== 0x03)||((_STATUSDTC&amp;0x9F)== 0x9F)||((_STATUSDTC&amp;0x9F)== 0x8E)||((_STATUSDTC&amp;0x9F)== 0x88)||((_STATUSDTC&amp;0x9F)== 0x89)||((_STATUSDTC&amp;0x9F)== 0x93))))?15:((((_STATUSDTC&amp;0x9F)== 0x88)&amp;&amp; ((_STATUSDTC#6== 0x01)&amp;&amp;(((_STATUSDTC&amp;0x1F)== 0x01)||((_STATUSDTC&amp;0x1F)== 0x02)||((_STATUSDTC&amp;0x1F)== 0x03)||((_STATUSDTC&amp;0x9F)== 0x9F)||((_STATUSDTC&amp;0x9F)== 0x8E)||((_STATUSDTC&amp;0x9F)== 0x88)||((_STATUSDTC&amp;0x9F)== 0x89)||((_STATUSDTC&amp;0x9F)== 0x93))))?11:0)))))))))))))))'
     value = value.replace('&amp;', '&')
     value = value.replace('_STATUSDTC', '0x' + 'C9')
     tb = time.time()
-    print calc.calculate(value)
     te = time.time()
-    print 'calc:' + str(te - tb)
     value = '((_STATUSDTC#5== 0x01)&amp;&amp;(((_STATUSDTC&amp;0x1F)== 0x01)||((_STATUSDTC&amp;0x1F)== 0x02)||((_STATUSDTC&amp;0x1F)== 0x03)||((_STATUSDTC&amp;0x9F)== 0x9F)||((_STATUSDTC&amp;0x9F)== 0x8E)||((_STATUSDTC&amp;0x9F)== 0x88)||((_STATUSDTC&amp;0x9F)== 0x89)||((_STATUSDTC&amp;0x9F)== 0x93)))?1:(((_STATUSDTC#6== 0x01)&amp;&amp;(((_STATUSDTC&amp;0x1F)== 0x01)||((_STATUSDTC&amp;0x1F)== 0x02)||((_STATUSDTC&amp;0x1F)== 0x03)||((_STATUSDTC&amp;0x9F)== 0x9F)||((_STATUSDTC&amp;0x9F)== 0x8E)||((_STATUSDTC&amp;0x9F)== 0x88)||((_STATUSDTC&amp;0x9F)== 0x89)||((_STATUSDTC&amp;0x9F)== 0x93)))?2:0)'
     value = value.replace('&amp;', '&')
     value = value.replace('_STATUSDTC', '0x' + 'D3')
     tb = time.time()
-    print calc.calculate(value)
     te = time.time()
-    print 'calc:' + str(te - tb)
     value = '(1.0 * (100*_VXX_SPG_PWM_SP)) /256'
     value = value.replace('&amp;', '&')
     value = value.replace('_VXX_SPG_PWM_SP', '0x' + 'D3')
     tb = time.time()
-    print calc.calculate(value)
     te = time.time()
-    print 'calc:' + str(te - tb)
     value = '(_MODULE_ABSENT_9!= 0x00)?(((_BOOLEEN_CONTACT_EMBRAYAGE== 0x00)||(_BOOLEEN_CONTACT_EMBRAYAGE== 0x01))?((_BOOLEEN_CONTACT_EMBRAYAGE== 0x01)?1:((_BOOLEEN_CONTACT_EMBRAYAGE== 0x00)?0:1)):0):0'
     value = value.replace('&amp;', '&')
     value = value.replace('_MODULE_ABSENT_9', '0x' + '01')
     value = value.replace('_BOOLEEN_CONTACT_EMBRAYAGE', '0x' + '00')
     tb = time.time()
-    print calc.calculate(value)
     te = time.time()
-    print 'calc:' + str(te - tb)
     value = '_VIN'
     value = value.replace('_VIN', '11223344556677889900AABBCCDDEEFF1122')
     tb = time.time()
-    print calc.calculate(value)
     te = time.time()
-    print 'calc:' + str(te - tb)
