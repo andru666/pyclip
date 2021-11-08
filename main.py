@@ -1,5 +1,9 @@
 #Embedded file name: /build/PyCLIP/android/app/main.py
 from kivy.config import Config
+try:
+    from kivy_deps import sdl2, glew
+except:
+    pass
 Config.set('kivy', 'exit_on_escape', '0')
 from mod_elm import ELM, get_devices
 from mod_scan_ecus import ScanEcus
@@ -168,7 +172,11 @@ class screenConfig(App):
         btn = Button(text='WiFi (192.168.0.10:35000)', size_hint_y=None, height=(fs * 2,  'dp'))
         btn.bind(on_release=lambda btn: self.bt_dropdown.select(btn.text))
         self.bt_dropdown.add_widget(btn)
-        for name, address in ports.iteritems():
+        try:
+            porte = ports.iteritems()
+        except:
+            porte = ports.items()
+        for name, address in porte:
             if mod_globals.opt_port == name:
                 mod_globals.opt_dev_address = address
             btn = Button(text=name + '>' + address, size_hint_y=None, height=(fs * 2,  'dp'))
@@ -273,7 +281,11 @@ class screenConfig(App):
         layout.add_widget(Label(text='PyClip (pyren)', font_size=(fs*2,  'dp'), height=(fs * 2,  'dp'), size_hint=(1, None)))
         layout.add_widget(Label(text='Data directory : ' + mod_globals.user_data_dir, font_size=(fs,  'dp'), height=(fs*2,  'dp'), multiline=True, size_hint=(1, None)))
         get_zip()
-        layout.add_widget(Label(text='DB archive : ' + str(mod_globals.db_archive_file).rsplit('\\')[1], font_size=(fs,  'dp'), height=(fs,  'dp'), multiline=True, size_hint=(1, None)))
+        try:
+            self.archive = str(mod_globals.db_archive_file).rpartition('/')[2]
+        except:
+            self.archive = str(mod_globals.db_archive_file).rpartition('\\')[2]
+        layout.add_widget(Label(text='DB archive : ' + self.archive, font_size=(fs*0.9,  'dp'), height=(fs,  'dp'), multiline=True, size_hint=(1, None)))
         gobtn = Button(text='START', height=(fs * 5,  'dp'), size_hint=(1, None), on_press=self.finish)
         layout.add_widget(gobtn)
         layout.add_widget(self.make_bt_device_entry())
@@ -336,27 +348,26 @@ def main():
     settings = mod_globals.Settings()
     kivyScreenConfig()
     settings.save()
-    elm = ELM(mod_globals.opt_port, mod_globals.opt_speed, mod_globals.opt_log)
-    # try:
-    #     elm = ELM(mod_globals.opt_port, mod_globals.opt_speed, mod_globals.opt_log)
-    # except:
-    #     labelText = '''
-    #         Could not connect to the ELM.
+    try:
+        elm = ELM(mod_globals.opt_port, mod_globals.opt_speed, mod_globals.opt_log)
+    except:
+        labelText = '''
+            Could not connect to the ELM.
 
-    #         Possible causes:
-    #         - Bluetooth is not enabled
-    #         - other applications are connected to your ELM e.g Torque
-    #         - other device is using this ELM
-    #         - ELM got unpaired
-    #         - ELM is read under new name or it changed its name
+            Possible causes:
+            - Bluetooth is not enabled
+            - other applications are connected to your ELM e.g Torque
+            - other device is using this ELM
+            - ELM got unpaired
+            - ELM is read under new name or it changed its name
 
-    #         Check your ELM connection and try again.
-    #     '''
-    #     lbltxt = Label(text=labelText, font_size=mod_globals.fontSize)
-    #     popup_load = Popup(title='ELM connection error', content=lbltxt, size=(800, 800), auto_dismiss=True, on_dismiss=exit)
-    #     popup_load.open()
-    #     base.runTouchApp()
-    #     exit(2)
+            Check your ELM connection and try again.
+        '''
+        lbltxt = Label(text=labelText, font_size=mod_globals.fontSize)
+        popup_load = Popup(title='ELM connection error', content=lbltxt, size=(800, 800), auto_dismiss=True, on_dismiss=exit)
+        popup_load.open()
+        base.runTouchApp()
+        exit(2)
     if mod_globals.opt_speed < mod_globals.opt_rate and not mod_globals.opt_demo:
         elm.port.soft_boudrate(mod_globals.opt_rate)
     se = ScanEcus(elm)
