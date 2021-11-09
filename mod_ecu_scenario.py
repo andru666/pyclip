@@ -1,6 +1,12 @@
 #Embedded file name: /build/PyCLIP/android/app/mod_ecu_scenario.py
-import re
-
+import re, os
+from jnius import autoclass
+Environment = autoclass('android.os.Environment')
+import sys
+scen_dir = Environment.getExternalStorageDirectory().getAbsolutePath() + '/pyren/scen/'
+if not os.path.exists(scen_dir):
+    os.makedirs(scen_dir)
+sys.path.append(scen_dir)
 def playScenario(command, ecu, elm):
     services = ecu.Services
     scenarioName, scenarioData = command.scenario.split('#')
