@@ -196,6 +196,26 @@ class screenConfig(App):
         setattr(self.langbutton, 'background_normal', '')
         setattr(self.langbutton, 'background_color', (0.345,0.345,0.345,1))
 
+    def make_savedEcus(self):
+        fs = int(Window.size[1])/(int(Window.size[0])/9)
+        ecus = sorted(glob.glob(os.path.join(mod_globals.user_data_dir, 'savedEcus*.p')))
+        label1 = Label(text='savedEcus', halign='left', valign='middle', size_hint=(1, None), height=(fs * 2,  'dp'), font_size=(fs,  'dp'))
+        self.ecus_dropdown = DropDown(size_hint=(1, None), height=(fs,  'dp'))
+        label1.bind(size=label1.setter('text_size'))
+        glay = GridLayout(cols=2, height=(fs * 3,  'dp'), size_hint=(1, None), padding=10, spacing=10)
+        for s_ecus in ecus:
+            s_ecus = os.path.split(s_ecus)[1]
+            btn= Button(text=s_ecus, size_hint_y=None, height=(fs * 2,  'dp'))
+            btn.bind(on_release=lambda btn: self.ecus_dropdown.select(btn.text))
+            self.ecus_dropdown.add_widget(btn)
+            
+        self.ecusbutton = Button(text='Select', size_hint=(1, None), height=(fs * 2,  'dp'))
+        self.ecusbutton.bind(on_release=self.ecus_dropdown.open)
+        self.ecus_dropdown.bind(on_select=lambda instance, x: setattr(self.ecusbutton, 'text', x))
+        glay.add_widget(label1)
+        glay.add_widget(self.ecusbutton)
+        return glay
+
     def make_language_entry(self):
         fs = int(Window.size[1])/(int(Window.size[0])/9)
         langs = mod_zip.get_languages()
@@ -231,6 +251,7 @@ class screenConfig(App):
         mod_globals.opt_ecuid = ''
         mod_globals.opt_speed = 38400
         mod_globals.opt_rate = 38400
+        mod_globals.savedEcus = self.ecusbutton.text
         mod_globals.opt_lang = self.langbutton.text
         mod_globals.opt_car = 0
         if self.button['Generate logs'].active:
@@ -288,6 +309,7 @@ class screenConfig(App):
         layout.add_widget(Label(text='DB archive : ' + self.archive, font_size=(fs*0.9,  'dp'), height=(fs,  'dp'), multiline=True, size_hint=(1, None)))
         gobtn = Button(text='START', height=(fs * 5,  'dp'), size_hint=(1, None), on_press=self.finish)
         layout.add_widget(gobtn)
+        layout.add_widget(self.make_savedEcus())
         layout.add_widget(self.make_bt_device_entry())
         layout.add_widget(self.make_language_entry())
         layout.add_widget(self.make_box_switch('Demo mode', mod_globals.opt_demo))
@@ -301,7 +323,7 @@ class screenConfig(App):
         layout.add_widget(self.make_input('Font size', str(mod_globals.fontSize)))
         layout.add_widget(self.make_box_switch('KWP Force SlowInit', mod_globals.opt_si))
         layout.add_widget(self.make_box_switch('Use CFC0', mod_globals.opt_cfc0))
-        layout.add_widget(Label(text='PyClip by Marianpol 14-10-2021', font_size=(fs,  'dp'), height=(fs,  'dp'), size_hint=(1, None)))
+        layout.add_widget(Label(text='PyClip by Marianpol 14-10-2021\nPyClip_MOD by andru666 11-10-2021', font_size=(fs,  'dp'), height=(fs,  'dp'), size_hint=(1, None)))
         self.lay = layout
         root = ScrollView(size_hint=(1, 1), do_scroll_x=False, pos_hint={'center_x': 0.5,
          'center_y': 0.5})
@@ -371,11 +393,16 @@ def main():
     if mod_globals.opt_speed < mod_globals.opt_rate and not mod_globals.opt_demo:
         elm.port.soft_boudrate(mod_globals.opt_rate)
     se = ScanEcus(elm)
-    SEFname = mod_globals.user_data_dir + '/savedEcus.p'
+    if mod_globals.opt_scan or mod_globals.savedEcus == 'Select' or mod_globals.savedEcus == '':
+        mod_globals.opt_scan = self.button['Scan vehicle'].active
+        mod_globals.savedEcus = 'savedEcus.p'
+    SEFname = mod_globals.user_data_dir + '/' + mod_globals.savedEcus
     if mod_globals.opt_can2:
-        SEFname = mod_globals.user_data_dir + '/savedEcus2.p'
+        if mod_globals.opt_can2 or mod_globals.savedEcus == 'Select' or mod_globals.savedEcus == '':
+            mod_globals.savedEcus = 'savedEcus_can2.p'
+        SEFname = mod_globals.user_data_dir + '/' + mod_globals.savedEcus_can2
     if not os.path.exists(SEFname):
-        SEFname = './savedEcus.p'
+        SEFname = './' + mod_globals.savedEcus
     if mod_globals.opt_demo and len(mod_globals.opt_ecuid) > 0:
         se.read_Uces_file(all=True)
         se.detectedEcus = []

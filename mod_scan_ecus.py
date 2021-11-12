@@ -151,11 +151,13 @@ class ScanEcus():
                  vehindexTopo])
 
     def scanAllEcus(self):
-        SEFname = mod_globals.user_data_dir + '/savedEcus.p'
+        if mod_globals.opt_scan or mod_globals.savedEcus == 'Select' or mod_globals.savedEcus == '': mod_globals.savedEcus = 'savedEcus.p'
+        SEFname = mod_globals.user_data_dir + '/' + mod_globals.savedEcus
         if mod_globals.opt_can2:
-            SEFname = mod_globals.user_data_dir + '/savedEcus2.p'
+            if mod_globals.opt_scan or mod_globals.savedEcus == 'Select' or mod_globals.savedEcus == '': mod_globals.savedEcus = 'savedEcus_can2.p'
+            SEFname = mod_globals.user_data_dir + '/' + mod_globals.savedEcus_can2
         if mod_globals.opt_demo and not os.path.isfile(SEFname):
-            SEFname = './savedEcus.p'
+            SEFname = './' + mod_globals.savedEcus
         if os.path.isfile(SEFname) and not mod_globals.opt_scan:
             self.detectedEcus = pickle.load(open(SEFname, 'rb'))
             if len(self.detectedEcus) > 0 and 'idTx' not in self.detectedEcus[0].keys():

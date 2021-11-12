@@ -83,7 +83,6 @@ class Scenarii(App):
                 value = pyren_encode(Param.getAttribute('value'))
                 self.ScmSet[setname] = value
                 self.ScmParam[name] = value
-
         super(Scenarii, self).__init__(**kwargs)
 
     def build(self):
