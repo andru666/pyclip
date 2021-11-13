@@ -394,7 +394,6 @@ def main():
         elm.port.soft_boudrate(mod_globals.opt_rate)
     se = ScanEcus(elm)
     if mod_globals.opt_scan or mod_globals.savedEcus == 'Select' or mod_globals.savedEcus == '':
-        mod_globals.opt_scan = self.button['Scan vehicle'].active
         mod_globals.savedEcus = 'savedEcus.p'
     SEFname = mod_globals.user_data_dir + '/' + mod_globals.savedEcus
     if mod_globals.opt_can2:

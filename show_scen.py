@@ -115,21 +115,45 @@ class Scenarii(App):
     def show_scen(self, msg):
         layout_popup = GridLayout(cols=1, spacing=5, padding=fs*0.5, size_hint=(1, None))
         layout_popup.bind(minimum_width=layout_popup.setter('width'), minimum_height=layout_popup.setter('height'))
-        for line in self.ScmRoom.toprettyxml().splitlines():
-            if 'name' in line:
+        layout_popup.add_widget(MyLabel(text=self.command.scenario.split('#')[1], bgcolor=(1, 0, 0, 0.3)))
+        for line in self.DOMTree.toprettyxml().splitlines():
+            if 'value' in line:
                 layout_popup.add_widget(MyLabel(text='', bgcolor=(1, 1, 0, 0.3)))
                 pa = re.compile(r'name=\"(\w+)\"\s+value=\"(\w+)\"')
                 ma = pa.search( line.strip() )
                 if ma:
                     p_name = ma.group(1)
                     p_value = ma.group(2)
-                
                     if p_value.isdigit() and p_value in mod_globals.language_dict.keys():
                         p_value = mod_globals.language_dict[p_value]
                     layout_popup.add_widget(MyLabel(text=str(pyren_encode( "    %-20s : %s" % (p_name, p_value) )), font_size=fs, halign= 'left'))
                 else:
                     layout_popup.add_widget(MyLabel(text=str(pyren_encode( line.strip().encode('utf-8', 'ignore').decode('utf-8'))), font_size=fs,  halign= 'left'))
-        layout_popup.add_widget(Label (text='\n'))
+        if self.command.scenario.startswith('scen'):
+            name_scen_text = self.command.scenario.split('#')[1].replace('&', '=').split('=')[1] +'_Text.xml'
+            layout_popup.add_widget(MyLabel(text=name_scen_text, bgcolor=(1, 0, 0, 0.3)))
+            for line in mod_zip.get_xml_scenario('Scendata/'+ name_scen_text).toprettyxml().splitlines():
+                
+                if 'value' in line:
+                    layout_popup.add_widget(MyLabel(text='', bgcolor=(1, 1, 0, 0.3)))
+                    pa = re.compile(r'value=\"(\w+)\"\s+name=\"(.+)\"')
+                    ma = pa.search( line.strip() )
+                    pa2 = re.compile(r'name=\"(.+)\"\s+value=\"(\w+)\"')
+                    ma2 = pa2.search( line.strip() )
+                    if ma:
+                        p_name = ma.group(2)
+                        p_value = ma.group(1)
+                        if p_value.isdigit() and p_value in mod_globals.language_dict.keys():
+                            p_value = mod_globals.language_dict[p_value]
+                        layout_popup.add_widget(MyLabel(text=str(pyren_encode( "    %-20s : %s" % (p_name, p_value) )), font_size=fs, halign= 'left'))
+                    elif ma2:
+                        p_name = ma2.group(1)
+                        p_value = ma2.group(2)
+                        if p_value.isdigit() and p_value in mod_globals.language_dict.keys():
+                            p_value = mod_globals.language_dict[p_value]
+                        layout_popup.add_widget(MyLabel(text=str(pyren_encode( "    %-20s : %s" % (p_name, p_value) )), font_size=fs, halign= 'left'))
+                    else:
+                        layout_popup.add_widget(MyLabel(text=str(pyren_encode( line.strip().encode('utf-8', 'ignore').decode('utf-8'))), font_size=fs,  halign= 'left'))
         layout_popup.add_widget(Button(text='CANCEL', on_press=self.stop, size_hint=(1, None), height=60))
         root = ScrollView(size_hint=(1, 1), size=(Window.width*0.9, Window.height*0.9))
         root.add_widget(layout_popup)
