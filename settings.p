@@ -28,7 +28,7 @@ Vlog.txt
 p11
 sS'fontSize'
 p12
-I20
+I10
 sS'csv'
 p13
 I00

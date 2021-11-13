@@ -14,7 +14,7 @@ def playScenario(command, ecu, elm):
 
     services = ecu.Services
     scenarioName, scenarioData = command.scenario.split('#')
-
+    
     if scenarioName.lower().startswith('scm'):
         scenarioName = scenarioName.split(':')[1]
         ecuNumberPattern = re.compile(r'\d{5}')
@@ -25,9 +25,9 @@ def playScenario(command, ecu, elm):
         scenarioName = scenarioName.split(':')[1]
         ecuNumberPattern = re.compile(r'\d{5}')
         ecuNumberIndex = ecuNumberPattern.search(scenarioData)
-        scenarioName = scenarioData[:scenarioData.find(ecuNumberIndex.group(0)) - 1]
+        scenarioD = scenarioData.replace('_Ecu_', '').replace('_ECU_', '').replace('_Const_', '').replace('_CONST_', '')
+        scenarioName = scenarioD[:scenarioD.find(ecuNumberIndex.group(0))].lower()
         scenarioData = 'Ecudata/'+scenarioData
-
     try:
         scen = __import__(scenarioName)
         scen.run(elm, ecu, command, scenarioData)

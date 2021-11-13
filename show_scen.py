@@ -118,7 +118,7 @@ class Scenarii(App):
         layout_popup.add_widget(MyLabel(text=self.command.scenario.split('#')[1], bgcolor=(1, 0, 0, 0.3)))
         for line in self.DOMTree.toprettyxml().splitlines():
             if 'value' in line:
-                layout_popup.add_widget(MyLabel(text='', bgcolor=(1, 1, 0, 0.3)))
+                layout_popup.add_widget(MyLabel(text='', height=5, bgcolor=(1, 1, 0, 0.3)))
                 pa = re.compile(r'name=\"(\w+)\"\s+value=\"(\w+)\"')
                 ma = pa.search( line.strip() )
                 if ma:
@@ -135,7 +135,7 @@ class Scenarii(App):
             for line in mod_zip.get_xml_scenario('Scendata/'+ name_scen_text).toprettyxml().splitlines():
                 
                 if 'value' in line:
-                    layout_popup.add_widget(MyLabel(text='', bgcolor=(1, 1, 0, 0.3)))
+                    layout_popup.add_widget(MyLabel(text='', height=5, bgcolor=(1, 1, 0, 0.3)))
                     pa = re.compile(r'value=\"(\w+)\"\s+name=\"(.+)\"')
                     ma = pa.search( line.strip() )
                     pa2 = re.compile(r'name=\"(.+)\"\s+value=\"(\w+)\"')
