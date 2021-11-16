@@ -130,9 +130,9 @@ class Scenarii(App):
                 else:
                     layout_popup.add_widget(MyLabel(text=str(pyren_encode( line.strip().encode('utf-8', 'ignore').decode('utf-8'))), font_size=fs,  halign= 'left'))
         if self.command.scenario.startswith('scen'):
-            name_scen_text = self.command.scenario.split('#')[1].replace('&', '=').split('=')[1] +'_Text.xml'
+            name_scen_text = (self.command.scenario.split('#')[1].replace('&', '=').split('=')[1] +'_text.xml').lower()
             layout_popup.add_widget(MyLabel(text=name_scen_text, bgcolor=(1, 0, 0, 0.3)))
-            for line in mod_zip.get_xml_scenario('Scendata/'+ name_scen_text).toprettyxml().splitlines():
+            for line in mod_zip.get_xml_scenario('scendata/'+ name_scen_text).toprettyxml().splitlines():
                 
                 if 'value' in line:
                     layout_popup.add_widget(MyLabel(text='', height=5, bgcolor=(1, 1, 0, 0.3)))

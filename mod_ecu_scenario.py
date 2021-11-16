@@ -20,13 +20,14 @@ def playScenario(command, ecu, elm):
         ecuNumberPattern = re.compile(r'\d{5}')
         ecuNumberIndex = ecuNumberPattern.search(scenarioData)
         scenarioName = scenarioData[:scenarioData.find(ecuNumberIndex.group(0)) - 1].lower()
+        scenarioData = scenarioData.lower()
     else:
-        scenarioData = scenarioData[5:].replace('=', '_').replace('.xml', '').replace('&ecu', '_Ecu')+'.xml'
+        scenarioData = scenarioData[5:].replace('=', '_').replace('.xml', '').replace('&', '_')+'.xml'
         scenarioName = scenarioName.split(':')[1]
         ecuNumberPattern = re.compile(r'\d{5}')
         ecuNumberIndex = ecuNumberPattern.search(scenarioData)
         scenarioName = scenarioData[:scenarioData.find(ecuNumberIndex.group(0)) - 1].lower()
-        scenarioData = 'Ecudata/'+scenarioData
+        scenarioData = 'ecudata/'+scenarioData.lower()
     try:
         if scenarioName.endswith('_ecu'):
             scen = __import__(scenarioName[:len(scenarioName)-4])

@@ -51,10 +51,7 @@ class MyLabel(Label):
                 lines = lines * 1.05
                 fmn = 1.5
             self.height = fmn * lines * fs
-        
-        if 'font_size' not in kwargs:
-            self.font_size = fs
-    
+
     def on_size(self, *args):
         if not self.canvas:
             return
@@ -66,15 +63,14 @@ class MyLabel(Label):
 class Scenarii(App):
     
     def __init__(self, **kwargs):
-        self.but_ok = False
         self.data = kwargs['data']
         self.elm = kwargs['elm']
         self.command = kwargs['command']
         self.ecu = kwargs['ecu']
         self.ScmParam = {}
         self.ScmSet = {}
-        if 'Ecudata' in self.data:
-            self.sdata = self.data.split('_')[0].replace('Ecudata', 'Scendata') + '_Text.xml'
+        if 'ecudata' in self.data:
+            self.sdata = self.data.split('_')[0].replace('ecudata', 'scendata') + '_text.xml'
             datas = [self.sdata, self.data]
         else:
             datas = self.data
@@ -111,10 +107,10 @@ class Scenarii(App):
         codemr = '%s : %s' % (pyren_encode(codemr), pyren_encode(label))
         self.vin_input = TextInput(text='VF', multiline=False, size_hint=(1, None), height=40)
         layout_current = BoxLayout(orientation='horizontal', size_hint=(1, None), height=50)
-        layout_current.add_widget(MyLabel(text=codemr, font_size=fs, size_hint=(0.3, 1), bgcolor=(0, 0, 1, 0.3)))
-        layout_current.add_widget(MyLabel(text=value, font_size=fs, size_hint=(0.7, 1), bgcolor=(0, 1, 0, 0.3)))
+        layout_current.add_widget(MyLabel(text=codemr, size_hint=(0.3, 1), bgcolor=(0, 0, 1, 0.3)))
+        layout_current.add_widget(MyLabel(text=value, size_hint=(0.7, 1), bgcolor=(0, 1, 0, 0.3)))
         root.add_widget(layout_current)
-        root.add_widget(MyLabel(text=self.get_message('text_33975'), font_size=fs, bgcolor=(1, 1, 0, 0.3)))
+        root.add_widget(MyLabel(text=self.get_message('text_33975'), bgcolor=(1, 1, 0, 0.3)))
         root.add_widget(self.vin_input)
         root.add_widget(Button(text=self.command.label, on_press=self.pupp, size_hint=(1, None), height=80))
         root.add_widget(Button(text=self.get_message('text_CANCEL'), on_press=self.stop, size_hint=(1, None), height=80))
@@ -128,13 +124,13 @@ class Scenarii(App):
             return None
         vin_crc = hex_VIN_plus_CRC(vin)
         self.ecu.run_cmd(self.ScmParam['pdd_VP-4-41'], vin_crc)
-        popup_w = Popup(title=self.get_message('text_9234'), content=Label(text=self.get_message('text_41453')), font_size=fs, auto_dismiss=True, size=(Window.width*0.7, Window.width*0.8), size_hint=(None, None))
+        popup_w = Popup(title=self.get_message('text_9234'), content=Label(text=self.get_message('text_41453')), auto_dismiss=True, size=(Window.width*0.7, Window.width*0.8), size_hint=(None, None))
         popup_w.open()
 
     def pupp(self, instance):
         layout = GridLayout(cols=1, spacing=5, padding=fs*0.5, size_hint=(1, None))
-        layout.add_widget(MyLabel(text=self.get_message('text_29120'), height=Window.width*0.4, font_size=fs, bgcolor=(1, 0, 0, 0.3)))
-        layout.add_widget(MyLabel(text=self.get_message('text_30338'), font_size=fs, bgcolor=(1, 1, 1, 0.3)))
+        layout.add_widget(MyLabel(text=self.get_message('text_29120'), height=Window.width*0.4, bgcolor=(1, 0, 0, 0.3)))
+        layout.add_widget(MyLabel(text=self.get_message('text_30338'), bgcolor=(1, 1, 1, 0.3)))
         layout_box = BoxLayout(orientation='horizontal', spacing=25, size_hint=(1, None))
         self.buttons_ok = Button(text=self.get_message('text_OK'), fonte_size=fs, size_hint=(1, None), height=fs*4, on_press=self.write_vin, on_release=lambda *args: self.popup.dismiss())
         layout_box.add_widget(self.buttons_ok)

@@ -67,7 +67,7 @@ def get_xml_file(name):
 
 def get_xml_scenario(name):
     zf = get_zip()
-    filename = SCENARIO_DIR + name
+    filename = SCENARIO_DIR + name.lower()
     return xml.dom.minidom.parseString(zf.read(filename))
 
 

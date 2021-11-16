@@ -35,7 +35,7 @@ class MyLabel(Label):
         if 'size_hint' not in kwargs:
             self.size_hint = (1, None)
         if 'height' not in kwargs:
-            fmn = 1.05
+            fmn = 1.25
             lines = len(self.text.split('\n'))
             simb = len(self.text) / 60
             if lines < simb: lines = simb
@@ -47,8 +47,7 @@ class MyLabel(Label):
                 fmn = 1.5
             self.height = fmn * lines * fs
         
-        if 'font_size' not in kwargs:
-            self.font_size = fs
+
     
     def on_size(self, *args):
         if not self.canvas:
@@ -102,7 +101,7 @@ class Scenarii(App):
         layout_current1. add_widget(MyLabel(text=values1, size_hint=(0.4, None), bgcolor=(0, 1, 0, 0.3)))
         layout_c1 = BoxLayout(orientation='horizontal', height=fs * 2, size_hint=(1, None))
         layout_c1.add_widget(MyLabel(text=self.get_message('dat_TitreSouhaite'), size_hint=(0.6, None), bgcolor=(1, 0, 0, 0.3)))
-        self.injec1 = TextInput(text=value1, height=fs*2, multiline=False, size_hint=(0.4, None), halign = 'center', font_size=fs)
+        self.injec1 = TextInput(text=value1, height=fs*2.5, multiline=False, size_hint=(0.4, None), halign = 'center', font_size=fs)
         layout_c1.add_widget(self.injec1)
         root.add_widget(layout_current1)
         root.add_widget(layout_c1)
@@ -114,7 +113,7 @@ class Scenarii(App):
         layout_current2. add_widget(MyLabel(text=values2, size_hint=(0.4, None), bgcolor=(0, 1, 0, 0.3)))
         layout_c2 = BoxLayout(orientation='horizontal', height=fs * 2, size_hint=(1, None))
         layout_c2.add_widget(MyLabel(text=self.get_message('dat_TitreSouhaite'), size_hint=(0.6, None), bgcolor=(1, 0, 0, 0.3)))
-        self.injec2 = TextInput(text=value2, height=fs*2, multiline=False, size_hint=(0.4, None), halign = 'center', font_size=fs)
+        self.injec2 = TextInput(text=value2, height=fs*2.5, multiline=False, size_hint=(0.4, None), halign = 'center', font_size=fs)
         layout_c2.add_widget(self.injec2)
         root.add_widget(layout_current2)
         root.add_widget(layout_c2)
@@ -126,7 +125,7 @@ class Scenarii(App):
         layout_current3. add_widget(MyLabel(text=values3, size_hint=(0.4, None), bgcolor=(0, 1, 0, 0.3)))
         layout_c3 = BoxLayout(orientation='horizontal', height=fs * 2, size_hint=(1, None))
         layout_c3.add_widget(MyLabel(text=self.get_message('dat_TitreSouhaite'), size_hint=(0.6, None), bgcolor=(1, 0, 0, 0.3)))
-        self.injec3 = TextInput(text=value3, height=fs*2, multiline=False, size_hint=(0.4, None), halign = 'center', font_size=fs)
+        self.injec3 = TextInput(text=value3, height=fs*2.5, multiline=False, size_hint=(0.4, None), halign = 'center', font_size=fs)
         layout_c3.add_widget(self.injec3)
         root.add_widget(layout_current3)
         root.add_widget(layout_c3)
@@ -138,7 +137,7 @@ class Scenarii(App):
         layout_current4. add_widget(MyLabel(text=values4, size_hint=(0.4, None), bgcolor=(0, 1, 0, 0.3)))
         layout_c4 = BoxLayout(orientation='horizontal', height=fs * 2, size_hint=(1, None))
         layout_c4.add_widget(MyLabel(text=self.get_message('dat_TitreSouhaite'), size_hint=(0.6, None), bgcolor=(1, 0, 0, 0.3)))
-        self.injec4 = TextInput(text=value4, height=fs*2, multiline=False, size_hint=(0.4, None), halign = 'center', font_size=fs)
+        self.injec4 = TextInput(text=value4, height=fs*2.5, multiline=False, size_hint=(0.4, None), halign = 'center', font_size=fs)
         layout_c4.add_widget(self.injec4)
         root.add_widget(layout_current4)
         root.add_widget(layout_c4)
