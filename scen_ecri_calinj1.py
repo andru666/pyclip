@@ -19,6 +19,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.textinput import TextInput
 from kivy.graphics import Color, Rectangle
+
 fs =  mod_globals.fontSize
 class MyLabel(Label):
 
@@ -39,7 +40,7 @@ class MyLabel(Label):
             simb = len(self.text) / 60
             if lines < simb: lines = simb
             if lines < 7: lines = 5
-            if lines > 20: lines = 13
+            if lines > 20: lines = 15
             if 1 > simb: lines = 2
             if fs > 20: 
                 lines = lines * 1.05
