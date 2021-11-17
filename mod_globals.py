@@ -4,6 +4,7 @@ import pickle
 opt_debug = True
 debug_file = None
 opt_port = ''
+opt_ecu = ''
 opt_ecuid = ''
 opt_ecuAddr = ''
 opt_protocol = ''
@@ -13,6 +14,7 @@ opt_dev_address = ''
 opt_lang = ''
 opt_car = ''
 opt_log = ''
+opt_ecuid_on = False
 opt_demo = False
 opt_scan = False
 opt_csv = False
@@ -49,6 +51,9 @@ fontSize = 20
 screen_orient = False
 
 class Settings:
+    opt_ecuid_on = False
+    opt_ecuid = ''
+    opt_ecu = ''
     port = ''
     lang = ''
     log = True
@@ -63,6 +68,9 @@ class Settings:
     dev_address = ''
 
     def __init__(self):
+        global opt_ecuid_on
+        global opt_ecuid
+        global opt_ecu
         global opt_lang
         global opt_si
         global opt_log
@@ -75,6 +83,8 @@ class Settings:
         global opt_csv
         global opt_dev_address
         self.load()
+        opt_ecu = self.opt_ecu
+        opt_ecuid_on = self.opt_ecuid_on
         opt_port = self.port
         opt_lang = self.lang
         opt_si = self.si
@@ -106,6 +116,7 @@ class Settings:
         self.__dict__.update(tmp_dict)
 
     def save(self):
+        self.opt_ecu = opt_ecu
         self.port = opt_port
         self.lang = opt_lang
         self.si = opt_si

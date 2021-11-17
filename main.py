@@ -1,4 +1,4 @@
-#Embedded file name: /build/PyCLIP/android/app/main.py
+﻿#Embedded file name: /build/PyCLIP/android/app/main.py
 from kivy.config import Config
 try:
     from kivy_deps import sdl2, glew
@@ -151,6 +151,28 @@ class screenConfig(App):
         glay.add_widget(sw)
         return glay
 
+    def make_opt_ecuid(self, callback = None):
+        str1 = 'OPT ecuid'
+        active = mod_globals.opt_ecuid_on
+        fs = int(Window.size[1])/(int(Window.size[0])/9)
+        label1 = Label(text=str1, halign='left', valign='middle', size_hint=(1, None), height=(fs * 3,  'dp'), font_size=(fs,  'dp'))
+        if mod_globals.opt_ecu:
+            iText = mod_globals.opt_ecu
+        else:
+            iText = ''
+        ti = TextInput(text=iText, multiline=False, font_size=(fs,  'dp'))
+        self.textInput[str1] = ti
+        label1.bind(size=label1.setter('text_size'))
+        sw = Switch(active=active, size_hint=(1, None), height=(fs * 2,  'dp'))
+        if callback:
+            sw.bind(active=callback)
+        self.button[str1] = sw
+        glay = GridLayout(cols=3, height=(fs * 3,  'dp'), size_hint=(1, None), padding=10, spacing=10)
+        glay.add_widget(label1)
+        glay.add_widget(sw)
+        glay.add_widget(ti)
+        return glay
+
     def make_input(self, str1, iText):
         fs = int(Window.size[1])/(int(Window.size[0])/9)
         label1 = Label(text=str1, halign='left', valign='middle', size_hint=(1, None), height=(fs * 3,  'dp'), font_size=(fs,  'dp'))
@@ -248,7 +270,9 @@ class screenConfig(App):
 
     def finish(self, instance):
         mod_globals.opt_port = ''
-        mod_globals.opt_ecuid = ''
+        mod_globals.opt_ecu = str(self.textInput['OPT ecuid'].text)
+        mod_globals.opt_ecuid = str(self.textInput['OPT ecuid'].text)
+        mod_globals.opt_ecuid_on = self.button['OPT ecuid'].active
         mod_globals.opt_speed = 38400
         mod_globals.opt_rate = 38400
         mod_globals.savedEcus = self.ecusbutton.text
@@ -309,6 +333,7 @@ class screenConfig(App):
         layout.add_widget(Label(text='DB archive : ' + self.archive, font_size=(fs*0.9,  'dp'), height=(fs,  'dp'), multiline=True, size_hint=(1, None)))
         gobtn = Button(text='START', height=(fs * 5,  'dp'), size_hint=(1, None), on_press=self.finish)
         layout.add_widget(gobtn)
+        layout.add_widget(self.make_opt_ecuid())
         layout.add_widget(self.make_savedEcus())
         layout.add_widget(self.make_bt_device_entry())
         layout.add_widget(self.make_language_entry())
@@ -370,6 +395,7 @@ def main():
     settings = mod_globals.Settings()
     kivyScreenConfig()
     settings.save()
+
     if mod_globals.opt_scan: mod_globals.opt_demo = False
     try:
         elm = ELM(mod_globals.opt_port, mod_globals.opt_speed, mod_globals.opt_log)
@@ -403,15 +429,23 @@ def main():
         SEFname = mod_globals.user_data_dir + '/' + mod_globals.savedEcus_can2
     if not os.path.exists(SEFname):
         SEFname = './' + mod_globals.savedEcus
-    if mod_globals.opt_demo and len(mod_globals.opt_ecuid) > 0:
-        se.read_Uces_file(all=True)
+    if mod_globals.opt_demo and len(mod_globals.opt_ecuid) > 0 and mod_globals.opt_ecuid_on:
+        if 'tcom' in mod_globals.opt_ecuid.lower() or len(mod_globals.opt_ecuid)<4:
+            tcomid = ''.join([i for i in mod_globals.opt_ecuid if i.isdigit()])
+            se.load_model_ECUs('Vehicles/TCOM_'+tcomid+'.xml')
+            mod_globals.opt_ecuid = ','.join(sorted(se.allecus.keys()))
+        else:
+            se.read_Uces_file(all=True)
         se.detectedEcus = []
         for i in mod_globals.opt_ecuid.split(','):
             if i in se.allecus.keys():
                 se.allecus[i]['ecuname'] = i
                 se.allecus[i]['idf'] = se.allecus[i]['ModelId'][2:4]
-                if se.allecus[i]['idf'][0] == '0':
-                    se.allecus[i]['idf'] = se.allecus[i]['idf'][1]
+                if se.allecus[i]['idf']!='':
+                    if se.allecus[i]['idf'][0] == '0':
+                        se.allecus[i]['idf'] = se.allecus[i]['idf'][1]
+                else:
+                        continue
                 se.allecus[i]['pin'] = 'can'
                 se.detectedEcus.append(se.allecus[i])
 
