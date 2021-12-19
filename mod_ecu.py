@@ -173,7 +173,7 @@ class MyLabelGreen(ButtonBehavior, Label):
     def toAdd(self, *args):
         self.canvas.before.clear()
         with self.canvas.before:
-            Color(.38,.55,.95,.5)
+            Color(0.38, 0.55, 0.95, 0.5)
             Rectangle(pos=self.pos, size=self.size)
 
     def toNormal(self, *args):
@@ -485,6 +485,7 @@ class ECU():
         df.close()
 
     def loadDump(self, dumpname = ''):
+
         global ecudump
         ecudump = {}
         if len(dumpname) == 0:
@@ -506,10 +507,9 @@ class ECU():
             if ':' in l:
                 req, rsp = l.split(':')
                 ecudump[req] = rsp
-
         self.elm.setDump(ecudump)
 
-    def get_st(self, name):
+    def get_st(self, name, no_formatting = False):
         if name not in self.States.keys():
             for i in self.States.keys():
                 if name == self.States[i].codeMR:
@@ -519,8 +519,12 @@ class ECU():
         if name not in self.States.keys():
             return ('none', 'unknown state')
         self.elm.clear_cache()
-        datastr, help, csvd = get_state(self.States[name], self.Mnemonics, self.Services, self.elm, self.calc)
-        return (csvd, datastr)
+        if no_formatting:
+            idName, datastr, help, csvd, icsvd = get_state(self.States[name], self.Mnemonics, self.Services, self.elm, self.calc, no_formatting)
+            return (datastr, help, csvd)
+        else:
+            datastr, help, csvd = get_state(self.States[name], self.Mnemonics, self.Services, self.elm, self.calc)
+            return (csvd, datastr)
 
     def get_ref_st(self, name):
         if name not in self.States.keys():
@@ -533,7 +537,7 @@ class ECU():
             return None
         return self.States[name]
 
-    def get_pr(self, name):
+    def get_pr(self, name, no_formatting = False):
         if name not in self.Parameters.keys():
             for i in self.Parameters.keys():
                 if name == self.Parameters[i].codeMR:
@@ -543,8 +547,12 @@ class ECU():
         if name not in self.Parameters.keys():
             return ('none', 'unknown parameter')
         self.elm.clear_cache()
-        datastr, help, csvd = get_parameter(self.Parameters[name], self.Mnemonics, self.Services, self.elm, self.calc)
-        return (csvd, datastr)
+        if no_formatting:
+            idName, datastr, help, csvd, unit, icsvd  = get_parameter(self.Parameters[name], self.Mnemonics, self.Services, self.elm, self.calc, no_formatting)
+            return (datastr, help, csvd, unit)
+        else:
+            datastr, help, csvd = get_parameter(self.Parameters[name], self.Mnemonics, self.Services, self.elm, self.calc)
+            return (csvd, datastr)
 
     def get_ref_pr(self, name):
         if name not in self.Parameters.keys():
@@ -980,9 +988,9 @@ class ECU():
                 if l.name == 'RZ':
                     l.name = 'RZ : Resets'
                 if l.name == 'SC':
-                    continue
+                    l.name = 'SC : Configuration scenarios'
                 if l.name == 'SCS':
-                    continue
+                    l.name = 'SCS : Security configuration scenarios'
                 if l.name == 'EZ':
                     l.name = 'EZ : EZSTEP'
                 if l.name == 'FAV':

@@ -17,17 +17,27 @@ def playScenario(command, ecu, elm):
 
     if scenarioName.lower().startswith('scm'):
         scenarioName = scenarioName.split(':')[1]
-        ecuNumberPattern = re.compile(r'\d{5}')
+        ecuNumberPattern = re.compile(r'_\d{5}')
         ecuNumberIndex = ecuNumberPattern.search(scenarioData)
-        scenarioName = scenarioData[:scenarioData.find(ecuNumberIndex.group(0)) - 1].lower()
+        scenarioName = scenarioData[:scenarioData.find(ecuNumberIndex.group(0))].lower()
         scenarioData = scenarioData.lower()
     else:
         scenarioData = scenarioData[5:].replace('=', '_').replace('.xml', '').replace('&', '_')+'.xml'
         scenarioName = scenarioName.split(':')[1]
-        ecuNumberPattern = re.compile(r'\d{5}')
+        ecuNumberPattern = re.compile(r'_\d{5}')
         ecuNumberIndex = ecuNumberPattern.search(scenarioData)
-        scenarioName = scenarioData[:scenarioData.find(ecuNumberIndex.group(0)) - 1].lower()
+        scenarioName = scenarioData[:scenarioData.find(ecuNumberIndex.group(0))].lower()
         scenarioData = 'ecudata/'+scenarioData.lower()
+    """if scenarioName.endswith('_ecu'):
+        scen = __import__(scenarioName[:len(scenarioName)-4])
+    elif scenarioName.endswith('_const'):
+        scen = __import__(scenarioName[:len(scenarioName)-6])
+    else:
+        scen = __import__(scenarioName)
+    scen.run(elm, ecu, command, scenarioData)
+    return True
+    
+    """
     try:
         if scenarioName.endswith('_ecu'):
             scen = __import__(scenarioName[:len(scenarioName)-4])

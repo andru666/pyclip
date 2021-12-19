@@ -201,7 +201,7 @@ class screenConfig(App):
         for name, address in porte:
             if mod_globals.opt_port == name:
                 mod_globals.opt_dev_address = address
-            btn = Button(text=name + '>' + address, size_hint_y=None, height=(fs * 2,  'dp'))
+            btn = Button(text=address, size_hint_y=None, height=(fs * 2,  'dp'))
             btn.bind(on_release=lambda btn: self.bt_dropdown.select(btn.text))
             self.bt_dropdown.add_widget(btn)
 
@@ -363,7 +363,7 @@ def destroy():
 def kivyScreenConfig():
     global resizeFont
     if mod_globals.os != 'android':
-        Window.size = (700, 800)
+        Window.size = (600, 700)
     else:
         if not mod_globals.screen_orient:
             set_orientation_portrait()
@@ -395,8 +395,16 @@ def main():
     settings = mod_globals.Settings()
     kivyScreenConfig()
     settings.save()
-
-    if mod_globals.opt_scan: mod_globals.opt_demo = False
+    if mod_globals.opt_scan or mod_globals.savedEcus == 'Select' or mod_globals.savedEcus == '':
+        mod_globals.savedEcus = 'savedEcus.p'
+    SEFname = mod_globals.user_data_dir + '/' + mod_globals.savedEcus
+    if mod_globals.opt_can2:
+        if mod_globals.opt_can2 or mod_globals.savedEcus == 'Select' or mod_globals.savedEcus == '':
+            mod_globals.savedEcus = 'savedEcus_can2.p'
+        SEFname = mod_globals.user_data_dir + '/' + mod_globals.savedEcus_can2
+    if not os.path.exists(SEFname):
+        SEFname = './' + mod_globals.savedEcus
+    if not os.path.isfile(SEFname) or mod_globals.opt_scan: mod_globals.opt_demo = False
     try:
         elm = ELM(mod_globals.opt_port, mod_globals.opt_speed, mod_globals.opt_log)
     except:
@@ -420,15 +428,7 @@ def main():
     if mod_globals.opt_speed < mod_globals.opt_rate and not mod_globals.opt_demo:
         elm.port.soft_boudrate(mod_globals.opt_rate)
     se = ScanEcus(elm)
-    if mod_globals.opt_scan or mod_globals.savedEcus == 'Select' or mod_globals.savedEcus == '':
-        mod_globals.savedEcus = 'savedEcus.p'
-    SEFname = mod_globals.user_data_dir + '/' + mod_globals.savedEcus
-    if mod_globals.opt_can2:
-        if mod_globals.opt_can2 or mod_globals.savedEcus == 'Select' or mod_globals.savedEcus == '':
-            mod_globals.savedEcus = 'savedEcus_can2.p'
-        SEFname = mod_globals.user_data_dir + '/' + mod_globals.savedEcus_can2
-    if not os.path.exists(SEFname):
-        SEFname = './' + mod_globals.savedEcus
+
     if mod_globals.opt_demo and len(mod_globals.opt_ecuid) > 0 and mod_globals.opt_ecuid_on:
         if 'tcom' in mod_globals.opt_ecuid.lower() or len(mod_globals.opt_ecuid)<4:
             tcomid = ''.join([i for i in mod_globals.opt_ecuid if i.isdigit()])
@@ -490,9 +490,30 @@ def main():
             pickle.dump(ecu, open(ecucashfile, 'wb'))
         ecu.initELM(elm)
         if mod_globals.opt_demo:
+            lbltxt = Label(text='Loading dump', font_size=20)
+            popup_init = Popup(title='Initializing', content=lbltxt, size=(400, 400), size_hint=(None, None))
+            base.runTouchApp(slave=True)
+            popup_init.open()
+            base.EventLoop.idle()
+            sys.stdout.flush()
             ecu.loadDump()
+            base.EventLoop.window.remove_widget(popup_init)
+            popup_init.dismiss()
+            base.stopTouchApp()
+            base.EventLoop.window.canvas.clear()
         elif mod_globals.opt_dump:
+            lbltxt = Label(text='Save dump', font_size=20)
+            popup_init = Popup(title='Initializing', content=lbltxt, size=(400, 400), size_hint=(None, None))
+            base.runTouchApp(slave=True)
+            popup_init.open()
+            base.EventLoop.idle()
+            sys.stdout.flush()
             ecu.saveDump()
+            base.EventLoop.window.remove_widget(popup_init)
+            popup_init.dismiss()
+            base.stopTouchApp()
+            base.EventLoop.window.canvas.clear()
+            self.elm.setDump(ecudump)
         ecu.show_screens()
 
 if __name__ == '__main__':

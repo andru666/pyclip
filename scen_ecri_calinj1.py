@@ -35,13 +35,13 @@ class MyLabel(Label):
         if 'size_hint' not in kwargs:
             self.size_hint = (1, None)
         if 'height' not in kwargs:
-            fmn = 1.25
+            fmn = 1.1
             lines = len(self.text.split('\n'))
             simb = len(self.text) / 60
             if lines < simb: lines = simb
             if lines < 7: lines = 5
             if lines > 20: lines = 15
-            if 1 > simb: lines = 2
+            if 1 > simb: lines = 1.5
             if fs > 20: 
                 lines = lines * 1.05
                 fmn = 1.5
@@ -143,7 +143,7 @@ class Scenarii(App):
         root.add_widget(layout_c4)
         root.add_widget(MyLabel(text=self.get_message('ContenuMb'), bgcolor=(1, 0, 0, 0.8)))
         root.add_widget(Button(text=self.get_message('TexteTitre'), on_press=self.write_inj, size_hint=(1, None), height=80))
-        root.add_widget(Button(text='CANCEL', on_press=self.stop, size_hint=(1, None), height=80))
+        root.add_widget(Button(text=self.get_message('6218'), on_press=self.stop, size_hint=(1, None), height=80))
         rot = ScrollView(size_hint=(1, 1), do_scroll_x=False, pos_hint={'center_x': 0.5,
          'center_y': 0.5})
         rot.add_widget(root)
