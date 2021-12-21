@@ -76,7 +76,8 @@ class Scenarii(App):
         self.status_event = None
         self.clock_event = None
         self.timer_event = None
-        self.needupdate = False
+        self.running = True
+        self.need_update = False
         self.start_regen = False
         self.begin_time = 0
         self.blue_part_size = 0.75
@@ -124,7 +125,7 @@ class Scenarii(App):
             resizeFont = True
             if self.clock_event is not None:
                 self.clock_event.cancel()
-            self.needupdate = False
+            self.need_update = False
             self.running = False
             self.stop()
             return True
@@ -133,7 +134,7 @@ class Scenarii(App):
             resizeFont = True
             if self.clock_event is not None:
                 self.clock_event.cancel()
-            self.needupdate = False
+            self.need_update = False
             self.running = False
             self.stop()
             return True
@@ -144,14 +145,13 @@ class Scenarii(App):
             self.begin_time = time.time()
             responce = self.ecu.run_cmd(self. ScmParam['Cmde1'])
         if dat == 'Scr7Msg8':
-            self.needupdate = True
+            self.need_update = True
         self.sm.current = dat
 
     def build(self):
         
         fs = mod_globals.fontSize
         header = '[' + self.command.codeMR + '] ' + self.command.label
-        params = self.get_ecu_values()
 
         root = GridLayout(cols=1, spacing=fs * 0.5, size_hint=(1, 1))
         root.add_widget(MyLabel(text=header))
@@ -182,6 +182,7 @@ class Scenarii(App):
         
         self.scr6 = ScrMsg(name='Scr6Msg7')
         self.sm.add_widget(self.scr6)
+        params = self.get_ecu_values()
         self.status = params[self.ScmParam['State1']]
         if self.status != pyren_encode(self.get_message('TOURNANT')):
             self.sceen6 = self.sceen('Scr6Msg7', 'Scr7Msg8', 'Informations', 'Scr5Msg6', 2)
@@ -202,20 +203,22 @@ class Scenarii(App):
             layout_current7.add_widget(self.sceen7)
             self.scr7.add_widget(layout_current7)
         else:
+            self.scr7.bind(on_enter=self.update)
             self.scr7.add_widget(self.regen())
             
         self.layout2.add_widget(self.sm)
         root.add_widget(self.layout2)
-        root.add_widget(Button(text=self.get_message('1053'), on_press=self.stop, size_hint=(1, None), height=80))
+        root.add_widget(Button(text=self.get_message('1053'), on_press=self.finish, size_hint=(1, None), height=80))
         root_s = ScrollView(size_hint=(1, 1), do_scroll_x=False, pos_hint={'center_x': 0.5,
          'center_y': 0.5})
         root_s.add_widget(root)
-        
-        if self.needupdate:
-            self.status_event = Clock.schedule_once(self.update_status, 0.05)
-            self.timer_event = Clock.schedule_once(self.update_timer, 1)
-            self.clock_event = Clock.schedule_once(self.update_values, 0.5)
         return root_s
+    
+    def update(self, dt):
+        if self.need_update:
+            self.timer_event = Clock.schedule_once(self.update_timer, 1)
+            self.clock_event = Clock.schedule_once(self.update_values, 0.1)
+            self.status_event = Clock.schedule_once(self.update_status, 0.1)
     
     def regen(self):
         layout_current7 = BoxLayout(orientation='vertical', spacing=5, size_hint=(1, 1))
@@ -242,6 +245,8 @@ class Scenarii(App):
     
     
     def update_timer(self, dt):
+        if not self.running:
+            return
         hours, minutes, seconds = self.timer()
         try:
             self.label_time.text = self.get_message('57936')+'   -   %02d:%02d:%02d' % (hours, minutes, seconds)
@@ -264,6 +269,7 @@ class Scenarii(App):
         return glay
 
     def stop_regen(self, instance=None):
+    
         responce = self.ecu.run_cmd(self.ScmParam['Cmde2'])
         params = self.get_ecu_values()
         self.rescode = pyren_encode(params[self.ScmParam['State3']])
@@ -271,20 +277,21 @@ class Scenarii(App):
         layout_popup = BoxLayout(orientation='vertical', spacing=5, size_hint=(1, 1))
         layout_popup.add_widget(MyLabel(text=pyren_encode(self.get_message('804'))+' - '+pyren_encode(self.phase), size_hint=(1, 0.2), bgcolor=(1, 1, 0, 0.3)))
         layout_popup.add_widget(MyLabel(text=pyren_encode(self.get_message('23819'))+' :\n '+pyren_encode(self.result), size_hint=(1, 0.2), bgcolor=(1, 0, 0, 0.3)))
-        layout_popup.add_widget(Button(text=self.get_message('1053'), on_press=self.stop, size_hint=(1, None), height=80))
+        layout_popup.add_widget(Button(text=self.get_message('1053'), on_press=self.finish, size_hint=(1, None), height=80))
         popup = Popup(title=self.get_message('TextCommandFinished'), auto_dismiss=True, content=layout_popup, size=(500, 500), size_hint=(None, None))
-        self.needupdate = False
-        self.on_pause()
+        self.need_update = False
         popup.open()
 
     def update_status(self, dt):
+        if not self.running:
+            return
         self.ecu.elm.clear_cache()
         self.phase, self.pfe = self.regen_status()
         try:
             self.labels['phase_status'].text = self.get_message('804')+' - '+pyren_encode(self.phase)
         except:
             pass
-        self.status_event = Clock.schedule_once(self.update_status, 0.05)
+        self.status_event = Clock.schedule_once(self.update_status, 0.1)
 
     def regen_status(self, name = False, no_formatting = False):
         params = self.get_ecu_values()
@@ -340,7 +347,6 @@ class Scenarii(App):
         return layout_current
     
     def get_ecu_values(self):
-        
         dct = OrderedDict()
         for name, key in self.ScmParam.iteritems():
             if not key[:1].isdigit():
@@ -350,13 +356,13 @@ class Scenarii(App):
                     value = '%s %s' % (value, unit)
                     dct[codemr] = value
                     self.paramsLabels[codemr] = key
-                    self.needupdate = True
+                    self.need_update = True
                 if key[:2] == 'ET':
                     codemr, label, value = self.ecu.get_st(self.ScmParam[name], True)
                     key = '%s - %s' % (codemr, label)
                     dct[codemr] = value
                     self.paramsLabels[codemr] = key
-                    self.needupdate = True
+                    self.need_update = True
                 if key[:2] == 'ID':
                     codemr, label, value = self.ecu.get_id(self.ScmParam[name], True)
                     key = '%s - %s' % (codemr, label)
@@ -365,6 +371,8 @@ class Scenarii(App):
         return dct
         
     def update_values(self, dt):
+        if not self.running:
+            return
         self.ecu.elm.clear_cache()
         params = self.get_ecu_values()
         for param, val in params.iteritems():
@@ -372,7 +380,7 @@ class Scenarii(App):
                 self.labels[param].text = val.strip()
             except:
                 continue
-        self.clock_event = Clock.schedule_once(self.update_values, 0.05)
+        self.clock_event = Clock.schedule_once(self.update_values, 0.1)
     
     def make_box_params(self, parameter_name):
         
@@ -398,7 +406,11 @@ class Scenarii(App):
         if id.isdigit() and id in mod_globals.language_dict.keys():
             value = pyren_encode(mod_globals.language_dict[id])
         return value
-
+    
+    def finish(self, instance):
+        self.need_update = False
+        self.running = False
+        self.stop()
 
 def run(elm, ecu, command, data):
     app = Scenarii(elm=elm, ecu=ecu, command=command, data=data)
