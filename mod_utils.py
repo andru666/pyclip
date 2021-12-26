@@ -1,6 +1,6 @@
 #Embedded file name: /build/PyCLIP/android/app/mod_utils.py
 import os
-import sys
+import sys, atexit, subprocess, string, signal
 from kivy.app import App
 from kivy.core.window import Window
 from kivy.uix.button import Button
@@ -12,6 +12,10 @@ import mod_globals
 widgetglobal = None
 choice_result = None
 resizeFont = False
+try:
+    import webbrowser
+except:
+    pass
 
 class widgetChoiceLong(App):
 
@@ -241,6 +245,8 @@ def DBG(tag, s):
         mod_globals.debug_file.write('### ' + tag + '\n')
         mod_globals.debug_file.write('"' + s + '"\n')
 
+def isHex(s):
+    return all(c in string.hexdigits for c in s)
 
 def kill_server():
     if mod_globals.doc_server_proc is None:
