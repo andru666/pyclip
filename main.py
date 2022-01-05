@@ -201,7 +201,7 @@ class screenConfig(App):
         for name, address in porte:
             if mod_globals.opt_port == name:
                 mod_globals.opt_dev_address = address
-            btn = Button(text=address, size_hint_y=None, height=(fs * 2,  'dp'))
+            btn = Button(text=name + '>' + address, size_hint_y=None, height=(fs * 2,  'dp'))
             btn.bind(on_release=lambda btn: self.bt_dropdown.select(btn.text))
             self.bt_dropdown.add_widget(btn)
 
@@ -305,7 +305,13 @@ class screenConfig(App):
             mod_globals.opt_port = '192.168.0.10:35000'
         else:
             bt_device = self.mainbutton.text.split('>')
-            mod_globals.opt_port = bt_device[0]
+            if mod_globals.os != 'android':
+                try:
+                    mod_globals.opt_port = bt_device[1]
+                except:
+                    mod_globals.opt_port = bt_device[0]
+            else:
+                mod_globals.opt_port = bt_device[0]
             if len(bt_device) > 1:
                 mod_globals.opt_dev_address = bt_device[-1]
             mod_globals.bt_dev = self.mainbutton.text
@@ -348,7 +354,7 @@ class screenConfig(App):
         layout.add_widget(self.make_input('Font size', str(mod_globals.fontSize)))
         layout.add_widget(self.make_box_switch('KWP Force SlowInit', mod_globals.opt_si))
         layout.add_widget(self.make_box_switch('Use CFC0', mod_globals.opt_cfc0))
-        layout.add_widget(Label(text='PyClip by Marianpol 14-10-2021\nPyClip_MOD by andru666 15-11-2021', font_size=(fs,  'dp'), height=(fs,  'dp'), size_hint=(1, None)))
+        layout.add_widget(Label(text='PyClip by Marianpol 14-10-2021\nPyClip_MOD by andru666 27-12-2021', font_size=(fs,  'dp'), height=(fs,  'dp'), size_hint=(1, None)))
         self.lay = layout
         root = ScrollView(size_hint=(1, 1), do_scroll_x=False, pos_hint={'center_x': 0.5,
          'center_y': 0.5})
@@ -395,16 +401,6 @@ def main():
     settings = mod_globals.Settings()
     kivyScreenConfig()
     settings.save()
-    if mod_globals.opt_scan or mod_globals.savedEcus == 'Select' or mod_globals.savedEcus == '':
-        mod_globals.savedEcus = 'savedEcus.p'
-    SEFname = mod_globals.user_data_dir + '/' + mod_globals.savedEcus
-    if mod_globals.opt_can2:
-        if mod_globals.opt_can2 or mod_globals.savedEcus == 'Select' or mod_globals.savedEcus == '':
-            mod_globals.savedEcus = 'savedEcus_can2.p'
-        SEFname = mod_globals.user_data_dir + '/' + mod_globals.savedEcus_can2
-    if not os.path.exists(SEFname):
-        SEFname = './' + mod_globals.savedEcus
-    if not os.path.isfile(SEFname) or mod_globals.opt_scan: mod_globals.opt_demo = False
     try:
         elm = ELM(mod_globals.opt_port, mod_globals.opt_speed, mod_globals.opt_log)
     except:
@@ -428,14 +424,18 @@ def main():
     if mod_globals.opt_speed < mod_globals.opt_rate and not mod_globals.opt_demo:
         elm.port.soft_boudrate(mod_globals.opt_rate)
     se = ScanEcus(elm)
-
+    if mod_globals.opt_scan or mod_globals.savedEcus == 'Select' or mod_globals.savedEcus == '':
+        mod_globals.savedEcus = 'savedEcus.p'
+    SEFname = mod_globals.user_data_dir + '/' + mod_globals.savedEcus
+    if mod_globals.opt_can2:
+        if mod_globals.opt_can2 or mod_globals.savedEcus == 'Select' or mod_globals.savedEcus == '':
+            mod_globals.savedEcus = 'savedEcus_can2.p'
+        SEFname = mod_globals.user_data_dir + '/' + mod_globals.savedEcus_can2
+    if not os.path.exists(SEFname):
+        SEFname = './' + mod_globals.savedEcus
+    
     if mod_globals.opt_demo and len(mod_globals.opt_ecuid) > 0 and mod_globals.opt_ecuid_on:
-        if 'tcom' in mod_globals.opt_ecuid.lower() or len(mod_globals.opt_ecuid)<4:
-            tcomid = ''.join([i for i in mod_globals.opt_ecuid if i.isdigit()])
-            se.load_model_ECUs('Vehicles/TCOM_'+tcomid+'.xml')
-            mod_globals.opt_ecuid = ','.join(sorted(se.allecus.keys()))
-        else:
-            se.read_Uces_file(all=True)
+        se.read_Uces_file(all=True)
         se.detectedEcus = []
         for i in mod_globals.opt_ecuid.split(','):
             if i in se.allecus.keys():
@@ -444,8 +444,6 @@ def main():
                 if se.allecus[i]['idf']!='':
                     if se.allecus[i]['idf'][0] == '0':
                         se.allecus[i]['idf'] = se.allecus[i]['idf'][1]
-                else:
-                        continue
                 se.allecus[i]['pin'] = 'can'
                 se.detectedEcus.append(se.allecus[i])
 
@@ -513,7 +511,6 @@ def main():
             popup_init.dismiss()
             base.stopTouchApp()
             base.EventLoop.window.canvas.clear()
-            self.elm.setDump(ecudump)
         ecu.show_screens()
 
 if __name__ == '__main__':
