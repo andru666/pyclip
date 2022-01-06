@@ -296,13 +296,49 @@ class Scenario(App):
         layout2.add_widget(Button(text=self.get_message('6218'), on_press=lambda *args: self.button_screen('SCR1'), size_hint=(1, 1), background_color=(0, 1, 0, 1)))
         scr2.add_widget(layout2)
         self.sm.add_widget(scr2)
+        
+        self.scr3 = ScrMsg(name='SCR_I')
+        self.sm.add_widget(self.scr3)
         layout.add_widget(self.sm)
         root.add_widget(layout)
         root.add_widget(Button(text=self.get_message('1053'), on_press=self.stop, size_hint=(1, None)))
         rot = ScrollView(size_hint=(1, 1), do_scroll_x=False, pos_hint={'center_x': 0.5, 'center_y': 0.5})
         rot.add_widget(root)
         return rot
-    
+
+    def getValuesFromEcu(self, params):
+        paramToSend = ""
+        commandToRun = ""
+        requestToFindInCommandsRequests = ""
+        backupDict = {}
+
+        try:
+            idKeyToFindInRange = int((params.keys()[0]).replace("D",""))
+        except:
+            return commandToRun, paramToSend
+        else:
+            for rangeK in self.identsRangeKeys.keys():
+                if self.identsRangeKeys[rangeK]['begin'] <= idKeyToFindInRange <= self.identsRangeKeys[rangeK]['end']:
+                    requestToFindInCommandsRequests = "3B" + self.identsRangeKeys[rangeK]['frame'][-2:]
+                    isTakingParams = takesParams(requestToFindInCommandsRequests)
+                    if isTakingParams:
+                        for k,v in params.iteritems():
+                            backupDict[k] = self.ecu.get_id(identsList[k], 1)
+                            if v in identsList.keys():
+                                identsList[k] = self.ecu.get_id(identsList[v], 1)
+                            else:
+                                identsList[k] = v
+                        for idKey in range(self.identsRangeKeys[rangeK]['begin'], self.identsRangeKeys[rangeK]['end'] + 1):
+                            if identsList["D" + str(idKey)].startswith("ID"):
+                                identsList["D" + str(idKey)] = self.ecu.get_id(identsList["D" + str(idKey)], 1)
+                                backupDict["D" + str(idKey)] = identsList["D" + str(idKey)]
+                            paramToSend += identsList["D" + str(idKey)]
+                        commandToRun = isTakingParams
+                        break
+            
+            makeDump(commandToRun, backupDict)
+            return commandToRun, paramToSend
+
     def info(self, info, message):
         layout = BoxLayout(orientation='vertical', spacing=5, size_hint=(1, 2))
         layout.add_widget(MyLabel(text=self.get_message(info), size_hint=(1, 1), bgcolor=(0.3, 0.3, 0, 0.3)))
@@ -327,22 +363,86 @@ class Scenario(App):
     def button_screen(self, dat, start=None):
         self.sm.current = dat
  
-    def afterEcuChange(self, key):
-        print key
+    def afterEcuChange(self):
+        title = self.functions[6][0]
+        button = self.functions[6][1]
+        params = self.getValuesToChange(title)
+        self.scr3 = ScrMsg(name='SCR_I')
+        layout2 = BoxLayout(orientation='vertical', spacing=5, size_hint=(1, 1))
+        layout2.add_widget(self.info('Informations', 'Message21'))
+        self.scr3.add_widget(layout2)
+        
+        
+        """
+        lbltxt = Label(text=str(button))
+        
+        popup = Popup(title=title, auto_dismiss=True, content=lbltxt, size=(400, 400), size_hint=(None, None))
+        popup.open()
+        
+        currentType = self.ecu.get_id(self.identsList[params["IdentToBeDisplayed"].replace("Ident", "D")], 1)
+        slowTypeValue = self.get_message('ValueSlowParam')
+        fastTypeValue = self.get_message('ValueFastParam')
+        currentMessage = self.get_message_by_id('52676')
+        slowMessage = self.get_message('Slow')
+        fastMessage = self.get_message('Fast')
+        notDefinedMessage = self.get_message('NotDefined')
+        message2 = self.get_message('Message282')
+
+        typesButtons = OrderedDict()
+
+        typesButtons[self.get_message('Slow')] = slowTypeValue
+        typesButtons[self.get_message('Fast')] = fastTypeValue
+        
+        if currentType == slowTypeValue:
+            lbltxt.text = currentMessage + ': ' + slowMessage
+        elif currentType == fastTypeValue:
+            lbltxt.text = currentMessage + ': ' + fastMessage
+        else:
+            lbltxt.text = currentMessage + ': ' + notDefinedMessage
+        lbltxt.text += inProgressMessage
+
+        params[params["IdentToBeDisplayed"].replace("Ident", "D")] = typesButtons[choice[0]]
+        params.pop("IdentToBeDisplayed")
+
+        command, paramToSend = self.getValuesFromEcu(params)
+
+        if "ERROR" in paramToSend:
+            raw_input("Data downloading went wrong. Aborting.")
+            return
+        
+        EventLoop.idle()
+        response = self.ecu.run_cmd(command,paramToSend)
+        lbltxt.text = self.get_message('CommandFinishedMessage')
+        lbltxt.text += ':\n'
+        if "NR" in response:
+            lbltxt.text += self.get_message('MessageNACK')
+        else:
+            lbltxt.text += self.get_message('Message31')
+        """
  
-    def setGlowPlugsType(self, key):
+    def setGlowPlugsType(self):
         print key
  
     def resetValues(self, instance):
-        lbltxt = Label(text=str(instance.id))
-        popup = Popup(title='title', auto_dismiss=True, content=lbltxt, size=(400, 400), size_hint=(None, None))
-        popup.open()
-        title = ''
-        button = ''
-        defaultCommand = ''
+        title = functions[key][0]
+        button = functions[key][1]
+        defaultCommand = functions[key][2]
+        """
+        if instance.id.startswith('Button6'):
+            self.afterEcuChange()
+            self.button_screen('SCR_I')
+            return
+        if instance.id.startswith('Button8'):
+            self.setGlowPlugsType()
+            return"""
+        lbltxt = Label(text=(instance.id))
         paramToSend = ""
         commandTakesParams = True
+        params = getValuesToChange(title)
         
+        
+        popup = Popup(title='title', auto_dismiss=True, content=lbltxt, size=(400, 400), size_hint=(None, None))
+        popup.open()
 
     def resetInjetorsData(self, key):
         response = ''
