@@ -266,33 +266,29 @@ class Scenario(App):
         self.sm.add_widget(scr1)
         layout1 = BoxLayout(orientation='vertical', spacing=5, size_hint=(1, 1))
         layout1.add_widget(self.info('Informations', 'Message1'))
+        id_bt = 1
         for bt in self.correctEcu.buttons.keys():
             if bt == 'InjectorsButton':
                 if str(self.correctEcu.buttons[bt]) == 'true':
                     layout1.add_widget(Button(text=self.get_message('Injectors'), on_press=lambda *args: self.button_screen('SCR_INJ'), size_hint=(1, 1), background_color=(0, 1, 0, 1)))
             if bt == 'EGRValveButton':
                 if str(self.correctEcu.buttons[bt]) == 'true':
-                    layout1.add_widget(Button(text=self.get_message('EGR_VALVE'), size_hint=(1, 1), background_color=(0, 1, 0, 1)))
+                    layout1.add_widget(Button(text=self.get_message('EGR_VALVE'), id=str(id_bt), on_press=self.resetValues, size_hint=(1, 1), background_color=(0, 1, 0, 1)))
             if bt == 'InletFlapButton':
                 if str(self.correctEcu.buttons[bt]) == 'true':
-                    layout1.add_widget(Button(text=self.get_message('INLET_FLAP'), size_hint=(1, 1), background_color=(0, 1, 0, 1)))
+                    layout1.add_widget(Button(text=self.get_message('INLET_FLAP'), id=str(id_bt), on_press=self.resetValues, size_hint=(1, 1), background_color=(0, 1, 0, 1)))
             if bt.startswith("Button"):
                 if str(self.correctEcu.buttons[bt]) == 'true':
-                    layout1.add_widget(Button(text=self.get_message(bt[:-6] + "Text"),id=bt,  on_press=self.resetValues, size_hint=(1, 1), background_color=(0, 1, 0, 1)))
-                    
+                    layout1.add_widget(Button(text=self.get_message(bt[:-6] + "Text"),id=str(id_bt), on_press=self.resetValues, size_hint=(1, 1), background_color=(0, 1, 0, 1)))
+            id_bt += 1
         scr1.add_widget(layout1)
         scr2 = ScrMsg(name='SCR_INJ')
         layout2 = BoxLayout(orientation='vertical', spacing=5, size_hint=(1, 1))
         layout2.add_widget(self.info('Informations', 'Message21'))
-        inj = self.functions[1][1].keys()
-        self.inj_button = Button(text=inj[0], on_press=lambda *args: self.resetInjetorsData(inj[0]), size_hint=(1, 1), background_color=(0, 1, 0, 1))
-        layout2.add_widget(self.inj_button)
-        self.inj_button = Button(text=inj[1], on_press=lambda *args: self.resetInjetorsData(inj[1]), size_hint=(1, 1), background_color=(0, 1, 0, 1))
-        layout2.add_widget(self.inj_button)
-        self.inj_button = Button(text=inj[2], on_press=lambda *args: self.resetInjetorsData(inj[2]), size_hint=(1, 1), background_color=(0, 1, 0, 1))
-        layout2.add_widget(self.inj_button)
-        self.inj_button = Button(text=inj[3], on_press=lambda *args: self.resetInjetorsData(inj[3]), size_hint=(1, 1), background_color=(0, 1, 0, 1))
-        layout2.add_widget(self.inj_button)
+        
+        for inj in self.functions[1][1].keys(): 
+            layout2.add_widget(Button(text=inj, id=inj, on_press=self.resetInjetorsData, size_hint=(1, 1), background_color=(0, 1, 0, 1)))
+        
         layout2.add_widget(Button(text=self.get_message('6218'), on_press=lambda *args: self.button_screen('SCR1'), size_hint=(1, 1), background_color=(0, 1, 0, 1)))
         scr2.add_widget(layout2)
         self.sm.add_widget(scr2)
@@ -424,10 +420,14 @@ class Scenario(App):
         print key
  
     def resetValues(self, instance):
-        title = functions[key][0]
-        button = functions[key][1]
-        defaultCommand = functions[key][2]
+        
+        paramToSend = ""
+        commandTakesParams = True
         """
+        title = self.functions[instance.id][0]
+        button = self.functions[instance.id][1]
+        defaultCommand = self.functions[instance.id][2]
+        
         if instance.id.startswith('Button6'):
             self.afterEcuChange()
             self.button_screen('SCR_I')
@@ -436,23 +436,22 @@ class Scenario(App):
             self.setGlowPlugsType()
             return"""
         lbltxt = Label(text=(instance.id))
-        paramToSend = ""
-        commandTakesParams = True
-        params = getValuesToChange(title)
+        
+        #params = self.getValuesToChange(title)
         
         
         popup = Popup(title='title', auto_dismiss=True, content=lbltxt, size=(400, 400), size_hint=(None, None))
         popup.open()
 
-    def resetInjetorsData(self, key):
+    def resetInjetorsData(self, instance):
         response = ''
         lbltxt = Label(text=self.get_message('CommandInProgressMessage'))
         title = self.get_message('Clip')
-        title = key
+        
         popup = Popup(title=title, auto_dismiss=True, content=lbltxt, size=(400, 400), size_hint=(None, None))
         popup.open()
         EventLoop.idle()
-        response = self.ecu.run_cmd(self.functions[1][1][key])
+        response = self.ecu.run_cmd(self.functions[1][1][instance.id])
         lbltxt.text = self.get_message('CommandFinishedMessage')
         lbltxt.text += ':\n'
         if "NR" in response:
