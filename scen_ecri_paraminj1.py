@@ -372,8 +372,8 @@ class Scenario(App):
 
     def info(self, info, message):
         layout = BoxLayout(orientation='vertical', spacing=5, size_hint=(1, 2))
-        layout.add_widget(MyLabel(text=self.get_message(info), size_hint=(1, 1), bgcolor=(0.3, 0.3, 0, 0.3)))
-        layout.add_widget(MyLabel(text=self.get_message(message), size_hint=(1, 1), bgcolor=(1, 0, 0, 0.3)))
+        layout.add_widget(MyLabel(text=self.get_message(info), size_hint=(1, 0.3), bgcolor=(0.3, 0.3, 0, 0.3)))
+        layout.add_widget(MyLabel(text=self.get_message(message), size_hint=(1, 0.7), bgcolor=(1, 0, 0, 0.3)))
         return layout
 
     def takesParams(self, request):
@@ -394,7 +394,7 @@ class Scenario(App):
     def button_screen(self, dat, start=None):
         self.sm.current = dat
  
-    def afterEcu_Change(self):
+    def afterEcu_Change(self, instance):
         self.popup_afterEcuChange.dismiss()
         title = self.functions[6][0]
         params = self.getValuesToChange(title)
@@ -450,28 +450,84 @@ class Scenario(App):
                 layout.add_widget(MyLabel(text=self.get_message('MessageBox2')))
                 self.mileage = TextInput(text=milea, multiline=False, size_hint=(1, None))
                 layout.add_widget(self.mileage)
+                self.AECbutton = Button(text=self.get_message('1926'), id='0', on_press=self.afterEcuChange, size_hint=(1, None), height=fs*4)
                 self.popup_afterEcuChange.dismiss()
             elif not (2 <= len(self.mileage.text) <= 6 and int(self.mileage.text) >= 10):
                 layout.add_widget(MyLabel(text=self.get_message('MessageBox1')))
                 self.mileage = TextInput(text=milea, multiline=False, size_hint=(1, None))
                 layout.add_widget(self.mileage)
+                self.AECbutton = Button(text=self.get_message('1926'), id='0', on_press=self.afterEcuChange, size_hint=(1, None), height=fs*4)
                 self.popup_afterEcuChange.dismiss()
             else:
+                layout.add_widget(MyLabel(text=self.mileage.text + ' ' + self.get_message('Unit1')))
+                self.AECbutton = Button(text=self.get_message('1926'), id='0', on_press=self.afterEcu_Change, size_hint=(1, None), height=fs*4)
                 self.popup_afterEcuChange.dismiss()
-                self.afterEcu_Change()
-                return   
         else:
             layout.add_widget(self.mileage)
-        layout.add_widget(Button(text=self.get_message('1926'), id='0', on_press=self.afterEcuChange, size_hint=(1, None), height=fs*4))
+            self.AECbutton = Button(text=self.get_message('1926'), id='0', on_press=self.afterEcuChange, size_hint=(1, None), height=fs*4)
+        layout.add_widget(self.AECbutton)
         self.popup_afterEcuChange = Popup(title=(self.Buttons[button]), auto_dismiss=True, content=layout, size=(Window.size[0]*0.9, Window.size[1]*0.9), size_hint=(None, None))
         self.popup_afterEcuChange.open()
         
-    def setGlowPlugsType(self):
-        print key
- 
+    def set_GlowPlugsType(self, instance):
+        self.popup_setGlowPlugsType.dismiss()
+        params = self.getValuesToChange(self.functions[8][0])
+        params[params["IdentToBeDisplayed"].replace("Ident", "D")] = self.get_message(instance.id)
+        params.pop("IdentToBeDisplayed")
+        layout = GridLayout(cols=1, spacing=fs * 0.5, size_hint=(1, 1))
+        lbltxt = MyLabel(text=self.get_message('CommandInProgressMessage'))
+        command, paramToSend = self.getValuesFromEcu(params)
+        if "ERROR" in paramToSend:
+            lbltxt.text = "Data downloading went wrong. Aborting."
+            popup = Popup(title=self.CLIP, auto_dismiss=True, content=lbltxt, size=(Window.size[0]*0.7, Window.size[1]*0.5), size_hint=(None, None))
+            popup.open()
+            return
+        
+        response = self.ecu.run_cmd(command,paramToSend)
+        lbltxt.text = self.get_message('CommandFinishedMessage')
+        lbltxt.text += ':\n'
+        if "NR" in response:
+            lbltxt.text += self.get_message('MessageNACK')
+        else:
+            lbltxt.text += self.get_message('Message31')
+        layout.add_widget(lbltxt)
+        popup = Popup(title=self.CLIP, auto_dismiss=True, content=layout, size=(Window.size[0]*0.7, Window.size[1]*0.5), size_hint=(None, None))
+        popup.open()
+        
+
+    def setGlowPlugsType(self, instance):
+        self.popup_resetValues.dismiss()
+        params = self.getValuesToChange(self.functions[8][0])
+        currentType, datastr = self.ecu.get_id(self.identsList[params["IdentToBeDisplayed"].replace("Ident", "D")])
+        slowTypeValue = self.get_message('ValueSlowParam')
+        fastTypeValue = self.get_message('ValueFastParam')
+        currentMessage = self.get_message_by_id('52676')
+        slowMessage = self.get_message('Slow')
+        fastMessage = self.get_message('Fast')
+        notDefinedMessage = self.get_message('NotDefined')
+        
+        layout = GridLayout(cols=1, spacing=fs * 0.5, size_hint=(1, 1))
+        if currentType == slowTypeValue:
+            currentTy = currentMessage + ': ' + slowMessage
+        elif currentType == fastTypeValue:
+            currentTy = currentMessage + ': ' + fastMessage
+        else:
+            currentTy = currentMessage + ': ' + notDefinedMessage
+        layout.add_widget(MyLabel(text=currentTy))
+        layout.add_widget(Button(text=slowMessage, id='ValueSlowParam', on_press=self.set_GlowPlugsType, size_hint=(1, 1), background_color=(0, 1, 0, 1)))
+        layout.add_widget(Button(text=fastMessage, id='ValueFastParam', on_press=self.set_GlowPlugsType, size_hint=(1, 1), background_color=(0, 1, 0, 1)))
+        layout_box = BoxLayout(orientation='horizontal', spacing=5, size_hint=(1, 1))
+        layout_box.add_widget(Button(text=self.get_message('1053'), on_press=self.stop, size_hint=(1, None), height=fs*4))
+        layout.add_widget(layout_box)
+        root = ScrollView(size_hint=(1, 1), do_scroll_x=False, pos_hint={'center_x': 0.5, 'center_y': 0.5})
+        root.add_widget(layout)
+        self.popup_setGlowPlugsType = Popup(title=(self.Buttons[self.functions[8][1]]), auto_dismiss=True, content=root, size=Window.size, size_hint=(None, None))
+        self.popup_setGlowPlugsType.open()    
+
     def reset_Values(self, instance):
         self.popup_resetValues.dismiss()
         key = int(instance.id)
+        defaultCommand = self.functions[key][2]
         title = self.functions[key][0]
         params = self.getValuesToChange(title)
         layout = GridLayout(cols=1, spacing=fs * 0.5, size_hint=(1, 1))
@@ -501,7 +557,6 @@ class Scenario(App):
         paramToSend = ""
         commandTakesParams = True
         button = self.functions[key][1]
-        defaultCommand = self.functions[key][2]
         
         layout = GridLayout(cols=1, spacing=fs * 0.5, size_hint=(1, 1))
         lbltxt = MyLabel(text='', size_hint=(1, 1))
@@ -512,20 +567,25 @@ class Scenario(App):
             lbltxt.text += self.get_message('Message24')
         if key == 5:
             lbltxt.text += self.get_message('Message25')
-        #if key == 8:
-            
+        if key == 8:
+            layout.add_widget(self.info('Informations', 'Message282'))
+            #lbltxt.text += self.get_message('MessageBox2')
+        if key == 7:
+            layout.add_widget(self.info('Informations', 'Message27'))
         if key == 6:
             layout.add_widget(self.info('Informations', 'Message262'))
-            lbltxt.text += self.get_message('MessageBox2')
-        layout.add_widget(lbltxt)
+            lbltxt.text += self.get_message('Message281')
+        if lbltxt.text != '': layout.add_widget(lbltxt)
         layout_box = BoxLayout(orientation='horizontal', spacing=5, size_hint=(1, 1))
+        res_button = Button(text=self.get_message('Yes'), id=str(key), size_hint=(1, 1), height=fs*2)
+        layout_box.add_widget(res_button)
         if key == 6:
-            layout_box.add_widget(Button(text=self.get_message('Yes'), id=str(key), on_press=self.afterEcuChange, size_hint=(1, None), height=fs*4))
+            res_button.bind(on_press=self.afterEcuChange)
         elif key == 8:
-            layout_box.add_widget(Button(text=self.get_message('Yes'), id=str(key), on_press=self.setGlowPlugsType, size_hint=(1, None), height=fs*4))            
+            res_button.bind(on_press=self.setGlowPlugsType)
         else:
-            layout_box.add_widget(Button(text=self.get_message('Yes'), id=str(key), on_press=self.reset_Values, size_hint=(1, None), height=fs*4))
-        layout_box.add_widget(Button(text=self.get_message('No'), on_press=self.stop, size_hint=(1, None), height=fs*4))
+            res_button.bind(on_press=self.reset_Values)
+        layout_box.add_widget(Button(text=self.get_message('No'), on_press=self.stop, size_hint=(1, 1), height=fs*2))
         layout.add_widget(layout_box)
         root = ScrollView(size_hint=(1, 1), do_scroll_x=False, pos_hint={'center_x': 0.5, 'center_y': 0.5})
         root.add_widget(layout)
