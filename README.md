@@ -1,4 +1,7 @@
 # pyclip
+07.01.2021
+Добавлен сценарий scen_ecri_paraminj1.py
+
 21.12.2021
 Добавлены скрипта:
 -scen_ecri_fap5
