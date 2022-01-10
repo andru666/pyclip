@@ -1,4 +1,7 @@
 # pyclip
+10.01.2022
+Добавлен сценарий scen_ecri_paraminj4.py
+
 09.01.2022
 Добавлен сценарий scen_ecri_fap4.py
 
@@ -7,10 +10,10 @@
 
 21.12.2021
 Добавлены скрипта:
--scen_ecri_fap5
--scen_ecri_initpente
--scen_ecri_counter2
--scen_ecri_calinj1(немного подправлен)
+1 scen_ecri_fap5
+2 scen_ecri_initpente
+3 scen_ecri_counter2
+4 scen_ecri_calinj1(немного подправлен)
 
 17.11.2021
 Добавлена опция(чтение блока по номеру), которая в pyren  прописывание при стартр -e. Просто надо написать номер блока, если необходимо несколько, то через запятую и без пробелов нописать номера.
