@@ -132,10 +132,7 @@ def pyren_encode(inp):
     if mod_globals.os == 'android':
         return inp.encode('utf-8', errors='replace')
     else:
-        try:
-            return inp.encode(sys.stdout.encoding, errors='replace')
-        except:
-            return inp.encode(sys.stdout.encoding, errors='replace').decode('utf-8')
+        return inp.encode(sys.stdout.encoding, errors='replace').decode('utf-8')
 
 def pyren_decode(inp):
     if mod_globals.os == 'android':
