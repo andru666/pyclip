@@ -17,6 +17,7 @@ from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.textinput import TextInput
+from functools import partial
 import xml.dom.minidom
 import xml.etree.cElementTree as et
 
@@ -74,7 +75,7 @@ class Scenarii(App):
         ScmParams = ScmRoom.getElementsByTagName('ScmParam')
         ScmSets = ScmRoom.getElementsByTagName('ScmSet')
         self.ScmParam = OrderedDict()
-        self.ScmSet = {}
+        self.ScmSet = OrderedDict()
         
         for Param in ScmParams:
             name = pyren_encode(Param.getAttribute('name'))
@@ -106,47 +107,47 @@ class Scenarii(App):
         rot = ScrollView(size_hint=(1, 1), do_scroll_x=False, pos_hint={'center_x': 0.5, 'center_y': 0.5})
         rot.add_widget(root)
         return rot
+    
+    def valueReset(self, name, value):
+        
+        if isHex(value):
+            response = self.ecu.run_cmd(self.ScmSet['Commands'][name],value)
+        else:
+            result = re.search(r"[^a-zA-Z\d\s:]", value)
+            if result:
+                parameters = re.findall(r"Ident\d+", value)
+                paramByteLength = len(parameters[0])/2
+                comp = value
+                for param in parameters:
+                    paramValue = self.ecu.get_id(self.ScmSet['Identifications'][param], 5)
+                    if isHex(paramValue):
+                        comp = comp.replace(param, '0x' + self.ecu.get_id(self.ScmSet['Identifications'][param], 5))
+                    if comp:
+                        calc = Calc()
+                        idValue = calc.calculate(comp)
+                        hexVal = hex(idValue)[2:]
+                        if len(hexVal)%2:
+                            hexVal = '0' + hexVal
+                        if (len(hexVal)/2) % paramByteLength:
+                            hexVal = '00' * (paramByteLength - len(hexVal)/2) + hexVal
+                        response = self.ecu.run_cmd(self.ScmSet['Commands'][name],hexVal)
+            else:
+                idValue = self.ecu.get_id(self.ScmSet['Identifications'][value], 5)
+                if isHex(idValue):
+                    response = self.ecu.run_cmd(self.ScmSet['Commands'][name],idValue)
+        return response
 
     def reset_Values(self,instance):
         self.popup.dismiss()
         
         self.lbltxt = Label(text=self.get_message('CommandInProgress'))
         response = ''
-        
         popup = Popup(title='STATUS', auto_dismiss=True, content=self.lbltxt, size=(Window.size[0]*0.7, Window.size[1]*0.7), size_hint=(None, None))
         popup.open()
+        time.sleep(5)
         base.EventLoop.idle
         for name, value in self.ScmSet['CommandParameters'].iteritems():
-            if isHex(value):
-                response += self.ecu.run_cmd(self.ScmSet['Commands'][name],value)
-            else:
-                result = re.search(r"[^a-zA-Z\d\s:]", value)
-                if result:
-                    parameters = re.findall(r"Ident\d+", value)
-                    paramByteLength = len(parameters[0])/2
-                    comp = value
-                    for param in parameters:
-                        paramValue, datastr = self.ecu.get_id(self.ScmSet['Identifications'][param])
-                        if not isHex(paramValue):
-                            comp = ''
-                            break
-                        comp = comp.replace(param, '0x' + self.ecu.get_id(self.ScmSet['Identifications'][param])[0])
-                    if not comp:
-                        continue
-                    calc = Calc()
-                    idValue = calc.calculate(comp)
-                    hexVal = hex(idValue)[2:]
-                    if len(hexVal)%2:
-                        hexVal = '0' + hexVal
-                    if (len(hexVal)/2) % paramByteLength:
-                        hexVal = '00' * (paramByteLength - len(hexVal)/2) + hexVal
-                    response += self.ecu.run_cmd(self.ScmSet['Commands'][name],hexVal)
-                else:
-                    idValue, datastr = self.ecu.get_id(self.ScmSet['Identifications'][value])
-                    if isHex(idValue):
-                        response += self.ecu.run_cmd(self.ScmSet['Commands'][name],idValue)
-            self.lbltxt.text = response
-            base.EventLoop.idle
+            response += self.valueReset(name, value)
         base.EventLoop.idle()
         self.lbltxt.text = self.get_message('CommandFinished')
         self.lbltxt.text += ':\n'
@@ -154,11 +155,14 @@ class Scenarii(App):
         if "NR" in response:
             self.lbltxt.text += self.get_message('EndScreenMessage4')
         else:
-            self.lbltxt.text += self.get_message('EndScreenMessage3')
-        
-        
+            self.lbltxt.text += self.get_message('EndScreenMessage3')   
+
+
+
     def resetValues(self, instance):
-        
+        if not mod_globals.opt_demo:
+            makeDump()
+            
         layout = GridLayout(cols=1, spacing=fs * 0.5, size_hint=(1, 1))
         self.lbltxt = MyLabel(text=self.get_message('CommandInProgress'))
         layout.add_widget(self.lbltxt)

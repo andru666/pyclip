@@ -14,7 +14,9 @@ def get_identification(id, mn, se, elm, calc, no_formatting = False):
     id.value = calc.calculate(comp)
     if id.type == 'CSTRING' and type(id.value) is str:
         id.value = id.value.decode('ascii', 'ignore')
-    if no_formatting:
+    if no_formatting == 5:
+        return hex_val
+    elif no_formatting:
         return (id.name, id.codeMR, id.label, id.value)
     elif mod_globals.os == 'android':
         return ('%-6s %-40s %-20s' % (id.codeMR, id.label, id.value), id.helps, id.value)

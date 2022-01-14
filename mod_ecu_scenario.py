@@ -28,17 +28,8 @@ def playScenario(command, ecu, elm):
         ecuNumberIndex = ecuNumberPattern.search(scenarioData)
         scenarioName = scenarioData[:scenarioData.find(ecuNumberIndex.group(0))].lower()
         scenarioData = 'ecudata/'+scenarioData.lower()
-    """if scenarioName.endswith('_ecu'):
-        scen = __import__(scenarioName[:len(scenarioName)-4])
-    elif scenarioName.endswith('_const'):
-        scen = __import__(scenarioName[:len(scenarioName)-6])
-    else:
-        scen = __import__(scenarioName)
-    scen.run(elm, ecu, command, scenarioData)
-    return True
-    
-    """
-    try:
+
+    if scenarioName == 'scen_ecri_paraminj4':
         if scenarioName.endswith('_ecu'):
             scen = __import__(scenarioName[:len(scenarioName)-4])
         elif scenarioName.endswith('_const'):
@@ -47,7 +38,18 @@ def playScenario(command, ecu, elm):
             scen = __import__(scenarioName)
         scen.run(elm, ecu, command, scenarioData)
         return True
-    except:
-        scen = __import__('show_scen')
-        scen.run(elm, ecu, command, scenarioData)
-        return True
+    else:    
+        try:
+            if scenarioName.endswith('_ecu'):
+                scen = __import__(scenarioName[:len(scenarioName)-4])
+            elif scenarioName.endswith('_const'):
+                scen = __import__(scenarioName[:len(scenarioName)-6])
+            else:
+                scen = __import__(scenarioName)
+            scen.run(elm, ecu, command, scenarioData)
+            return True
+        except:
+            
+            scen = __import__('show_scen')
+            scen.run(elm, ecu, command, scenarioData)
+            return True

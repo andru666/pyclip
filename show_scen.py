@@ -119,7 +119,7 @@ class Scenarii(App):
         for line in self.DOMTree.toprettyxml().splitlines():
             if 'value' in line:
                 layout_popup.add_widget(MyLabel(text='', height=5, bgcolor=(1, 1, 0, 0.3)))
-                pa = re.compile(r'name=\"(\w+)\"value=\"(\w+)\"')
+                pa = re.compile(r'name=\"(.+)\"value=\"(\w+)\"')
                 ma = pa.search(line.strip().replace(' ', ''))
                 if ma:
                     p_name = ma.group(1)

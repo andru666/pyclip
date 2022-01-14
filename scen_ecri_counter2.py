@@ -77,24 +77,19 @@ class Scenarii(App):
             self.ScmParam[name] = value
         
         for Set in ScmSets:
-            try:
+            if len(Set.attributes) != 1:
                 setname = pyren_encode(mod_globals.language_dict[Set.getAttribute('name')])
-            except:
-                pass
-            ScmParams = Set.getElementsByTagName('ScmParam')
-            for Param in ScmParams:
-                name = pyren_encode(Param.getAttribute('name'))
-                value = pyren_encode(Param.getAttribute('value'))
-                try:
+                ScmParams = Set.getElementsByTagName('ScmParam')
+                for Param in ScmParams:
+                    name = pyren_encode(Param.getAttribute('name'))
+                    value = pyren_encode(Param.getAttribute('value'))
                     self.ScmSet[setname] = value
-                except:
-                    pass
-                self.ScmParam[name] = value
+                    self.ScmParam[name] = value
         
         super(Scenarii, self).__init__(**kwargs)
 
     def build(self):
-        fs = mod_globals.fontSize
+
         mnemonics = self.ecu.get_ref_id(self.ScmParam['default']).mnemolist
 
         if mnemonics[0][-2:] > mnemonics[1][-2:]:

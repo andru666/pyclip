@@ -195,7 +195,7 @@ class Scenarii(App):
         
         if self.status != pyren_encode(self.get_message('TOURNANT')):
             layout_current7 = BoxLayout(orientation='vertical', spacing=5, size_hint=(1, 1))
-            layout_current7.add_widget(MyLabel(text=self.get_message('MsgBox_Message'), size_hint=(1, 0.2), bgcolor=(1, 0, 0, 0.3)))
+            layout_current7.add_widget(MyLabel(text=self.get_message_by_id('450'), size_hint=(1, 0.2), bgcolor=(1, 0, 0, 0.3)))
             layout_current7.add_widget(self.make_box_params('State1'))
             layout_current7.add_widget(self.make_box_params('Param6'))
             self.sceen7 = self.sceen('Scr7Msg8', None, None, None, None)

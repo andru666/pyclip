@@ -4,6 +4,7 @@ import pickle
 opt_debug = True
 debug_file = None
 opt_port = ''
+savedEcus = ''
 opt_ecu = ''
 opt_ecuid = ''
 opt_ecuAddr = ''
@@ -53,6 +54,7 @@ screen_orient = False
 class Settings:
     opt_ecuid_on = False
     opt_ecuid = ''
+    savedEcus = ''
     opt_ecu = ''
     port = ''
     lang = ''
@@ -68,6 +70,7 @@ class Settings:
     dev_address = ''
 
     def __init__(self):
+        global savedEcus
         global opt_ecuid_on
         global opt_ecuid
         global opt_ecu
@@ -85,6 +88,7 @@ class Settings:
         self.load()
         opt_ecu = self.opt_ecu
         opt_ecuid_on = self.opt_ecuid_on
+        savedEcus = self.savedEcus
         opt_port = self.port
         opt_lang = self.lang
         opt_si = self.si

@@ -575,7 +575,9 @@ class ECU():
         if name not in self.Identifications.keys():
             return ('none', 'unknown identification')
         self.elm.clear_cache()
-        if no_formatting:
+        if no_formatting == 5:
+            return get_identification( self.Identifications[name], self.Mnemonics, self.Services, self.elm, self.calc, no_formatting)
+        elif no_formatting:
             idName, datastr, help, csvd = get_identification(self.Identifications[name], self.Mnemonics, self.Services, self.elm, self.calc, no_formatting)
             return (datastr, help, csvd)
         else:

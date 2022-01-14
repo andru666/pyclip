@@ -33,23 +33,14 @@ def get_parameter(pr, mn, se, elm, calc, no_formatting = False, dataids = {}):
         tmpmin = ''
         tmpmax = ''
     if no_formatting:
-        return (pr.name, pr.codeMR,
-         pr.label,
-         pr.value,
-         pr.unit,
-         csv_data)
+        return (pr.name, pr.codeMR, pr.label, pr.value, pr.unit, csv_data)
     elif mod_globals.os == 'android':
         return ('%-6s %-41s %8s %-5s' % (pr.codeMR,
           pr.label,
           pr.value,
           pr.unit), pr.helps, csv_data)
     else:
-        return ('%-6s %-50s %5s %10s %-10s %-5s' % (pr.codeMR,
-          pr.label,
-          tmpmin,
-          pr.value,
-          pr.unit,
-          tmpmax), pr.helps, csv_data)
+        return ('%-6s %-50s %5s %10s %-10s %-5s' % (pr.codeMR, pr.label, tmpmin, pr.value, pr.unit, tmpmax), pr.helps, csv_data)
 
 
 class ecu_parameter:

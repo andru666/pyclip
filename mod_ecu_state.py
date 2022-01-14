@@ -19,7 +19,7 @@ def get_state(st, mn, se, elm, calc, no_formatting = False, dataids = {}):
         st.value = st.caracter[str(tmp_val).encode('utf-8')]
     else:
         st.value = str(tmp_val).encode("utf-8")
-    csv_val = unicode(st.value) if mod_globals.opt_csv_human else tmp_val
+    csv_val = unicode(st.value)
     if no_formatting:
         return (st.name, st.codeMR, st.label, st.value, csv_val)
     elif mod_globals.os == 'android':
