@@ -4,7 +4,14 @@ try:
     from kivy_deps import sdl2, glew
 except:
     pass
+from kivy.utils import platform
 Config.set('kivy', 'exit_on_escape', '0')
+
+if platform != 'android':
+    Config.set('graphics', 'position', 'custom')
+    Config.set('graphics', 'left', 300)
+    Config.set('graphics', 'top',  50)
+from kivy.core.window import Window
 from mod_elm import ELM, get_devices
 from mod_scan_ecus import ScanEcus
 from mod_ecu import ECU
@@ -21,11 +28,15 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.dropdown import DropDown
 from kivy.uix.switch import Switch
 from kivy.uix.textinput import TextInput
-from kivy.core.window import Window
 from kivy.uix.popup import Popup
-from kivy.utils import platform
 from kivy import base
 import traceback
+
+if int(Window.size[1]) > int(Window.size[0]):
+    fs = int(Window.size[1])/(int(Window.size[0])/9)
+else:
+    fs = int(Window.size[0])/(int(Window.size[1])/9)
+    
 __all__ = 'install_android'
 mod_globals.os = platform
 if mod_globals.os == 'android':
@@ -139,7 +150,7 @@ class screenConfig(App):
             activity.setRequestedOrientation(AndroidActivityInfo.SCREEN_ORIENTATION_SENSOR)
 
     def make_box_switch(self, str1, active, callback = None):
-        fs = int(Window.size[1])/(int(Window.size[0])/9)
+        
         label1 = Label(text=str1, halign='left', valign='middle', size_hint=(1, None), height=(fs * 2,  'dp'), font_size=(fs,  'dp'))
         sw = Switch(active=active, size_hint=(1, None), height=(fs * 2,  'dp'))
         if callback:
@@ -154,7 +165,7 @@ class screenConfig(App):
     def make_opt_ecuid(self, callback = None):
         str1 = 'OPT ecuid'
         active = mod_globals.opt_ecuid_on
-        fs = int(Window.size[1])/(int(Window.size[0])/9)
+        
         label1 = Label(text=str1, halign='left', valign='middle', size_hint=(1, None), height=(fs * 3,  'dp'), font_size=(fs,  'dp'))
         if mod_globals.opt_ecu:
             iText = mod_globals.opt_ecu
@@ -174,7 +185,7 @@ class screenConfig(App):
         return glay
 
     def make_input(self, str1, iText):
-        fs = int(Window.size[1])/(int(Window.size[0])/9)
+        
         label1 = Label(text=str1, halign='left', valign='middle', size_hint=(1, None), height=(fs * 3,  'dp'), font_size=(fs,  'dp'))
         ti = TextInput(text=iText, multiline=False, font_size=(fs,  'dp'))
         self.textInput[str1] = ti
@@ -185,7 +196,7 @@ class screenConfig(App):
         return glay
 
     def make_bt_device_entry(self):
-        fs = int(Window.size[1])/(int(Window.size[0])/9)
+        
         ports = get_devices()
         label1 = Label(text='ELM port', halign='left', valign='middle', size_hint=(1, None), height=(fs,  'dp'), font_size=(fs,  'dp'))
         self.bt_dropdown = DropDown(size_hint=(1, None), height=(fs * 2,  'dp'))
@@ -219,7 +230,7 @@ class screenConfig(App):
         setattr(self.langbutton, 'background_color', (0.345,0.345,0.345,1))
 
     def make_savedEcus(self):
-        fs = int(Window.size[1])/(int(Window.size[0])/9)
+        
         ecus = sorted(glob.glob(os.path.join(mod_globals.user_data_dir, 'savedEcus*.p')))
         label1 = Label(text='savedEcus', halign='left', valign='middle', size_hint=(1, None), height=(fs * 2,  'dp'), font_size=(fs,  'dp'))
         self.ecus_dropdown = DropDown(size_hint=(1, None), height=(fs,  'dp'))
@@ -239,7 +250,7 @@ class screenConfig(App):
         return glay
 
     def make_language_entry(self):
-        fs = int(Window.size[1])/(int(Window.size[0])/9)
+        
         langs = mod_zip.get_languages()
         label1 = Label(text='Language', halign='left', valign='middle', size_hint=(1, None), height=(fs * 2,  'dp'), font_size=(fs,  'dp'))
         self.lang_dropdown = DropDown(size_hint=(1, None), height=(fs,  'dp'))
@@ -326,7 +337,7 @@ class screenConfig(App):
             mod_globals.screen_orient = False
 
     def build(self):
-        fs = int(Window.size[1])/(int(Window.size[0])/9)
+        
         layout = GridLayout(cols=1, padding=10, spacing=20, size_hint=(1.0, None))
         layout.bind(minimum_height=layout.setter('height'))
         layout.add_widget(Label(text='PyClip (pyren)', font_size=(fs*2,  'dp'), height=(fs * 2,  'dp'), size_hint=(1, None)))
@@ -354,7 +365,7 @@ class screenConfig(App):
         layout.add_widget(self.make_input('Font size', str(mod_globals.fontSize)))
         layout.add_widget(self.make_box_switch('KWP Force SlowInit', mod_globals.opt_si))
         layout.add_widget(self.make_box_switch('Use CFC0', mod_globals.opt_cfc0))
-        layout.add_widget(Label(text='PyClip by Marianpol 14-10-2021\nPyClip_MOD by andru666 12-01-2022', font_size=(fs,  'dp'), height=(fs,  'dp'), size_hint=(1, None)))
+        layout.add_widget(Label(text='PyClip by Marianpol 14-10-2021\nPyClip_MOD by andru666 18-01-2022', font_size=(fs,  'dp'), height=(fs,  'dp'), size_hint=(1, None)))
         self.lay = layout
         root = ScrollView(size_hint=(1, 1), do_scroll_x=False, pos_hint={'center_x': 0.5,
          'center_y': 0.5})
@@ -369,7 +380,9 @@ def destroy():
 def kivyScreenConfig():
     global resizeFont
     if mod_globals.os != 'android':
-        Window.size = (600, 700)
+        if Window.size[0]>Window.size[1]: ws = Window.size[0]/Window.size[1]*1.1
+        else: ws = Window.size[1]/Window.size[0]*1.2
+        Window.size = (Window.size[0], Window.size[1]*ws)
     else:
         if not mod_globals.screen_orient:
             set_orientation_portrait()
