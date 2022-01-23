@@ -90,24 +90,6 @@ class Scenarii(App):
 
     def build(self):
 
-        mnemonics = self.ecu.get_ref_id(self.ScmParam['default']).mnemolist
-
-        if mnemonics[0][-2:] > mnemonics[1][-2:]:
-            mnemo1 = mnemonics[1]
-            mnemo2 = mnemonics[0]
-        else:
-            mnemo1 = mnemonics[0]
-            mnemo2 = mnemonics[1]
-        byteFrom = int(mnemo1[-2:])
-        byteTo = int(re.findall('\d+',mnemo2)[1])
-        byteCount = byteTo - byteFrom - 1
-        resetBytes = byteCount * '00'
-        
-        mnemo1Data = mod_ecu_mnemonic.get_mnemonic(self.ecu.Mnemonics[mnemo1], self.ecu.Services, self.elm)
-        mnemo2Data = mod_ecu_mnemonic.get_mnemonic(self.ecu.Mnemonics[mnemo2], self.ecu.Services, self.elm)
-
-        self.paramsToSend = mnemo1Data + resetBytes + mnemo2Data
-        
         header = '[' + self.command.codeMR + '] ' + self.command.label
         root = GridLayout(cols=1, spacing=fs * 0.5, size_hint=(1.0, None))
         root.bind(minimum_height=root.setter('height'))
@@ -123,7 +105,35 @@ class Scenarii(App):
         return rot
 
     def pupp(self, instance):
-        response = self.ecu.run_cmd(self.ScmParam['Cmde1'], self.paramsToSend)
+        
+        mnemonics = self.ecu.get_ref_id(self.ScmParam['default']).mnemolist
+
+        if mnemonics[0][-2:] > mnemonics[1][-2:]:
+            mnemo1 = mnemonics[1]
+            mnemo2 = mnemonics[0]
+        else:
+            mnemo1 = mnemonics[0]
+            mnemo2 = mnemonics[1]
+        byteFrom = int(mnemo1[-2:])
+        byteTo = int(re.findall('\d+',mnemo2)[1])
+        byteCount = byteTo - byteFrom - 1
+        resetBytes = byteCount * '00'
+        params_to_send_length = int(mnemo2[-2:])
+        
+        mnemo1Data = mod_ecu_mnemonic.get_mnemonic(self.ecu.Mnemonics[mnemo1], self.ecu.Services, self.elm)
+        mnemo2Data = mod_ecu_mnemonic.get_mnemonic(self.ecu.Mnemonics[mnemo2], self.ecu.Services, self.elm)
+    
+        paramsToSend = mnemo1Data + resetBytes + mnemo2Data
+        fap_command_sids = self.ecu.get_ref_cmd(self.ScmParam['Cmde1']).serviceID
+        if len(fap_command_sids) and not mod_globals.opt_demo:
+            for sid in fap_command_sids:
+                if len(self.ecu.Services[sid].params):
+                    if (len(self.ecu.Services[sid].startReq + paramsToSend)/2 != params_to_send_length):
+                        ch = missing_data_message + "\n\nPress ENTER to exit"
+                        popup = Popup(title='STATUS', content=Label(text=ch, text_size=(450, None), halign = 'center'), auto_dismiss=True, size=(500, 500), size_hint=(None, None))
+                        popup.open()
+                        return
+        response = self.ecu.run_cmd(self.ScmParam['Cmde1'], paramsToSend)
         if 'NR' in response:
             ch = self.get_message('CommandImpossible')
         else:

@@ -5,11 +5,11 @@ S'RU'
 p2
 sS'opt_ecu'
 p3
-S'10733'
+S'10480'
 p4
 sS'demo'
 p5
-I01
+I00
 sS'cfc'
 p6
 I00

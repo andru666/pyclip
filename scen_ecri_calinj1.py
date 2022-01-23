@@ -86,8 +86,9 @@ class Scenarii(App):
         super(Scenarii, self).__init__(**kwargs)
 
     def build(self):
-        notv = str('F'*int(self.ScmParam['nbCaractereCode']))
         
+        notv = str('F'*int(self.ScmParam['nbCaractereCode']))
+        if notv == '0': notv = 'F'
         header = '[' + self.command.codeMR + '] ' + self.command.label
         root = GridLayout(cols=1, spacing=fs * 0.5, size_hint=(1.0, None))
         root.bind(minimum_height=root.setter('height'))

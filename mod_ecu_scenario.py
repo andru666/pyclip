@@ -29,7 +29,7 @@ def playScenario(command, ecu, elm):
         scenarioName = scenarioData[:scenarioData.find(ecuNumberIndex.group(0))].lower()
         scenarioData = 'ecudata/'+scenarioData.lower()
 
-    if scenarioName == 'scen_ecri_paraminj4':
+    if scenarioName == 'scen21':
         if scenarioName.endswith('_ecu'):
             scen = __import__(scenarioName[:len(scenarioName)-4])
         elif scenarioName.endswith('_const'):

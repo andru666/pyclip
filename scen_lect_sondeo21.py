@@ -62,7 +62,7 @@ class MyLabel(Label):
             Rectangle(pos=self.pos, size=self.size)
 
 
-class Scenarii(App):
+class Scenario(App):
     
     def __init__(self, **kwargs):
         
@@ -96,7 +96,7 @@ class Scenarii(App):
         
         for Set in ScmSets:
             if len(Set.attributes) != 1:
-                setname = pyren_encode(mod_globals.language_dict[Set.getAttribute('name')])
+                setname = pyren_encode(Set.getAttribute('name'))
                 ScmParams = Set.getElementsByTagName('ScmParam')
                 scmParamsDict = OrderedDict()
                 for Param in ScmParams:
@@ -122,14 +122,13 @@ class Scenarii(App):
                 else:
                     self.ScmList_Messages.append( deepcopy(ScmUSet) )
         
-        super(Scenarii, self).__init__(**kwargs)
+        super(Scenario, self).__init__(**kwargs)
 
     def build(self):
         header = '[' + self.command.codeMR + '] ' + self.command.label
         root = GridLayout(cols=1, spacing=fs * 0.5, size_hint=(1.0, 1))
         root.bind(minimum_height=root.setter('height'))
         root.add_widget(MyLabel(text=header))
-
         root.add_widget(self.info('TexteInformations', ['TexteContenuInformationsE1', 'TexteContenuInformationsE4', 'TexteProcedureFin']))
         root.add_widget(Button(text=self.get_message('TexteScenario'), on_press=self.sondeO, size_hint=(1, None), height=80))
         root.add_widget(Button(text=self.get_message('6218'), on_press=self.stop, size_hint=(1, None), height=80))
@@ -154,36 +153,38 @@ class Scenarii(App):
         hours, minutes = divmod(minutes, 60)
         return hours, minutes, seconds
 
-    def phase_stop(self, phase, result):
+    def phase_stop(self, phase):
+        for m in self.ScmList_Messages:
+            if self.value1 == pyren_encode(mod_globals.language_dict[m['Valeur']]):
+                self.result    = pyren_encode( mod_globals.language_dict[m['Texte']])
         self.popup_O.dismiss()
         layout = GridLayout(cols=1, spacing=fs * 0.5, size_hint=(1, 1))
         layout.add_widget(MyLabel(text=phase, bgcolor=(1, 1, 0, 0.3)))
-        layout.add_widget(MyLabel(text=result, bgcolor=(1, 0, 0, 0.3)))
-        self.popup_open(self.get_message('TexteCommandeTerminee'), layout, 0.8)
+        layout.add_widget(MyLabel(text=self.get_message('TexteSousTitre') + ': ' + self.result, bgcolor=(1, 0, 0, 0.3)))
+        layout.add_widget(Button(text=self.get_message('6218'), on_press=self.stop, size_hint=(1, None), height=80))
+        self.popup_open(self.get_message('TexteCommandeTerminee'), layout, 0.8, 0.8)
 
     def update_status(self, dt):
         if not self.running:
             return
         self.ecu.elm.clear_cache()
-        result = ''
+        self.result = ''
         codemr0, label0, self.value0 = self.ecu.get_st(self.ScmParam['EtatComTer'], True)
         self.key0 = '%s - %s' % (codemr0, label0)
         codemr1, label1, self.value1 = self.ecu.get_st(self.ScmParam['EtatResultatTest'], True)
         self.key1 = '%s - %s' % (codemr1, label1)
-        Phase = self.get_message('804')+' - '+pyren_encode(self.value0)
-        self.phase.text = Phase
+        self.Phase = self.get_message('804')+' - '+pyren_encode(self.value0)
+        self.phase.text = self.Phase
         rescode = pyren_encode(self.value1)
         self.result = rescode
         self.labels[self.key0].text = self.value0 
         self.labels[self.key1].text = self.value1 
         if self.value0 == self.get_message_by_id('19532'):
-            for m in self.ScmList_Messages:
-                if self.value1 == pyren_encode(mod_globals.language_dict[m['Valeur']]):
-                    result    = pyren_encode( mod_globals.language_dict[m['Texte']])
-            if result:
-                self.finish()
-                self.popup_O.dismiss()
-                self.phase_stop(Phase, self.get_message('TexteSousTitre') + ': ' + result)
+            
+            self.finish()
+            self.popup_O.dismiss()
+            self.phase_stop(self.Phase)
+            return
         self.status_event = Clock.schedule_once(self.update_status, 0.1)
 
     def sonde_O(self):
@@ -202,7 +203,7 @@ class Scenarii(App):
         layout.add_widget(self.phase)
         layout.add_widget(self.make_box_params(self.key0, self.value0))
         layout.add_widget(self.make_box_params(self.key1, self.value1))
-        
+        layout.add_widget(Button(text=self.get_message_by_id('16870'), on_press=self.stopf, size_hint=(1, 1), height=fs*4))
         self.popup_open(self.get_message('TexteCommandeEnCours'), layout, 0.9, 0.8)
         if self.need_update:
             self.timer_event = Clock.schedule_once(self.update_timer, 1)
@@ -214,7 +215,6 @@ class Scenarii(App):
         self.sonde_O()
 
     def sondeO(self, instance):
-        
         self.layout = GridLayout(cols=1, spacing=fs * 0.5, size_hint=(1, 1))
         self.layout.bind(minimum_height=self.layout.setter('height'))
         self.layout.add_widget(MyLabel(text='', height=fs*0.001, size_hint=(1, 1), bgcolor=(1, 1, 1, 0.3)))
@@ -254,22 +254,16 @@ class Scenarii(App):
         return layout
     
     def popup_open(self, title, message, S1=None, S2=None):
-        if S1==None: 
-            S1 = Window.size[0]*0.5
-        else:
-            S1 = Window.size[0]*S1
-        if S2==None:
-            S2 = Window.size[1]*0.5
-        else:
-            S2 = Window.size[1]*S2
-            
+        if S1==None: S1 = Window.size[0]*0.5
+        else: S1 = Window.size[0]*S1
+        if S2==None: S2 = Window.size[1]*0.5
+        else: S2 = Window.size[1]*S2
         root = ScrollView(size_hint=(1, 1), do_scroll_x=False, pos_hint={'center_x': 0.5, 'center_y': 0.5})
         root.add_widget(message)
         self.popup_O = Popup(title=title, content=root, auto_dismiss=True, size=(S1, S2), size_hint=(None, None))
         self.popup_O.open()
 
     def make_box_params(self, parameter_name, value):
-        
         glay = BoxLayout(orientation='horizontal', size_hint=(1, 1), height=fs * 2.0)
         self.label1 = MyLabelGreen(text=parameter_name, halign='left', valign='top', size_hint=(self.blue_part_size, 1), font_size=fs, param_name=None)
         self.label2 = MyLabelBlue(text=value, halign='right', valign='top', size_hint=(1 - self.blue_part_size, 1), font_size=fs)
@@ -289,7 +283,13 @@ class Scenarii(App):
         self.need_update = False
         self.running = False
 
+    def stopf(self, instance):
+        self.need_update = False
+        self.running = False
+        self.phase_stop(self.Phase)
+        
+
 def run(elm, ecu, command, data):
-    app = Scenarii(elm=elm, 
+    app = Scenario(elm=elm, 
     ecu=ecu, command=command, data=data)
     app.run()
