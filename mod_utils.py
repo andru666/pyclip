@@ -128,11 +128,14 @@ def ChoiceFromDict(dict, question, showId = True):
             return [d[ch], ch]
 
 
-def pyren_encode(inp):
+def pyren_encodeS(inp):
     if mod_globals.os == 'android':
         return inp.encode('utf-8', errors='replace')
     else:
         return inp.encode(sys.stdout.encoding, errors='replace').decode('utf-8')
+
+def pyren_encode(inp):
+    return inp.encode('utf-8', errors='replace')
 
 def pyren_decode(inp):
     if mod_globals.os == 'android':

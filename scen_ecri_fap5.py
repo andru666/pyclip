@@ -184,7 +184,7 @@ class Scenarii(App):
         self.sm.add_widget(self.scr6)
         params = self.get_ecu_values()
         self.status = params[self.ScmParam['State1']]
-        if self.status != pyren_encode(self.get_message('TOURNANT')):
+        if pyren_encode(self.status) != (self.get_message('TOURNANT')):
             self.sceen6 = self.sceen('Scr6Msg7', 'Scr7Msg8', 'Informations', 'Scr5Msg6', 2)
         else:
             self.sceen6 = self.sceen('Scr6Msg7', 'Scr7Msg8', 'Informations', 'Scr5Msg6', 1)
@@ -193,7 +193,7 @@ class Scenarii(App):
         self.scr7 = ScrMsg(name='Scr7Msg8')
         self.sm.add_widget(self.scr7)
         
-        if self.status != pyren_encode(self.get_message('TOURNANT')):
+        if pyren_encode(self.status) != (self.get_message('TOURNANT')):
             layout_current7 = BoxLayout(orientation='vertical', spacing=5, size_hint=(1, 1))
             layout_current7.add_widget(MyLabel(text=self.get_message('MsgBox_Message'), size_hint=(1, 0.2), bgcolor=(1, 0, 0, 0.3)))
             layout_current7.add_widget(self.make_box_params('State1'))
@@ -208,7 +208,7 @@ class Scenarii(App):
             
         self.layout2.add_widget(self.sm)
         root.add_widget(self.layout2)
-        root.add_widget(Button(text=self.get_message('1053'), on_press=self.finish, size_hint=(1, None), height=80))
+        root.add_widget(Button(text=self.get_message_by_id('1053'), on_press=self.finish, size_hint=(1, None), height=80))
         root_s = ScrollView(size_hint=(1, 1), do_scroll_x=False, pos_hint={'center_x': 0.5,
          'center_y': 0.5})
         root_s.add_widget(root)
@@ -222,7 +222,7 @@ class Scenarii(App):
     
     def regen(self):
         layout_current7 = BoxLayout(orientation='vertical', spacing=5, size_hint=(1, 1))
-        self.phase, self.pfe = self.regen_status()
+        
         hours, minutes, seconds = self.timer()
         layout_current7.add_widget(MyLabel(text=self.get_message('TextCommandInProgress'), bgcolor=(0, 1, 1, 0.3)))
         self.label_time = MyLabel(text='', bgcolor=(1, 1, 0, 0.3))
@@ -239,7 +239,7 @@ class Scenarii(App):
         layout_current7.add_widget(self.make_box_params('State2'))
         layout_current7.add_widget(self.make_box_params('State3'))
         layout_current7.add_widget(self.make_box_params('State4'))
-        self.button_stop = Button(text=self.get_message('939'), on_press=self.stop_regen, size_hint=(1, None), height=80)
+        self.button_stop = Button(text=self.get_message('69')+str(' ')+self.get_message('SCMTitle'), on_press=self.stop_regen, size_hint=(1, None), height=80)
         layout_current7.add_widget(self.button_stop)
         return layout_current7
     
@@ -249,7 +249,7 @@ class Scenarii(App):
             return
         hours, minutes, seconds = self.timer()
         try:
-            self.label_time.text = self.get_message('57936')+'   -   %02d:%02d:%02d' % (hours, minutes, seconds)
+            self.label_time.text = self.get_message_by_id('57936')+'   -   %02d:%02d:%02d' % (hours, minutes, seconds)
         except:
             pass
         self.timer_event = Clock.schedule_once(self.update_timer, 1)
@@ -265,35 +265,27 @@ class Scenarii(App):
         glay = BoxLayout(orientation='horizontal', size_hint=(1, None), height=fs * 2.5)
         self.label_status = MyLabel(text='', bgcolor=(1, 1, 0, 0.3))
         glay.add_widget(self.label_status)
-        self.labels['phase_status'] = self.label_status
         return glay
 
     def stop_regen(self, instance=None):
-    
+        self.need_update = False
+        self.running = False
         responce = self.ecu.run_cmd(self.ScmParam['Cmde2'])
         params = self.get_ecu_values()
         self.rescode = pyren_encode(params[self.ScmParam['State3']])
         self.result = pyren_encode(mod_globals.language_dict[self.ScmSet[self.rescode]])
         layout_popup = BoxLayout(orientation='vertical', spacing=5, size_hint=(1, 1))
-        layout_popup.add_widget(MyLabel(text=pyren_encode(self.get_message('804'))+' - '+pyren_encode(self.phase), size_hint=(1, 0.2), bgcolor=(1, 1, 0, 0.3)))
-        layout_popup.add_widget(MyLabel(text=pyren_encode(self.get_message('23819'))+' :\n '+pyren_encode(self.result), size_hint=(1, 0.2), bgcolor=(1, 0, 0, 0.3)))
-        layout_popup.add_widget(Button(text=self.get_message('1053'), on_press=self.finish, size_hint=(1, None), height=80))
+        layout_popup.add_widget(MyLabel(text=(self.get_message_by_id('804'))+' - '+(self.phase), size_hint=(1, 0.2), bgcolor=(1, 1, 0, 0.3)))
+        layout_popup.add_widget(MyLabel(text=(self.get_message_by_id('23819'))+' :\n '+(self.result), size_hint=(1, 0.2), bgcolor=(1, 0, 0, 0.3)))
+        layout_popup.add_widget(Button(text=self.get_message_by_id('1053'), on_press=self.finish, size_hint=(1, None), height=80))
         popup = Popup(title=self.get_message('TextCommandFinished'), auto_dismiss=True, content=layout_popup, size=(500, 500), size_hint=(None, None))
-        self.need_update = False
+
         popup.open()
 
     def update_status(self, dt):
         if not self.running:
             return
         self.ecu.elm.clear_cache()
-        self.phase, self.pfe = self.regen_status()
-        try:
-            self.labels['phase_status'].text = self.get_message('804')+' - '+pyren_encode(self.phase)
-        except:
-            pass
-        self.status_event = Clock.schedule_once(self.update_status, 0.1)
-
-    def regen_status(self, name = False, no_formatting = False):
         params = self.get_ecu_values()
         self.etat = pyren_encode(params[self.ScmParam['State2']])
         self.pfe = 0
@@ -317,7 +309,10 @@ class Scenarii(App):
             self.pfe = 2
         else:  
             self.phase = self.etat
-        return self.phase, self.pfe
+        if self.pfe > 0:
+            self.stop_regen()
+        self.label_status.text = self.get_message_by_id('804')+' - ' + (self.phase)
+        self.status_event = Clock.schedule_once(self.update_status, 0.1)
 
     def sceen(self, screen, btn2, informations, btn1, start=None):
         
@@ -328,18 +323,18 @@ class Scenarii(App):
         if btn1 or btn2:
             layout = BoxLayout(orientation='horizontal', spacing=5, size_hint=(1, 0.2))
         if btn1:
-            nbtn1 = Button(text=self.get_message('6218'))
+            nbtn1 = Button(text=self.get_message_by_id('6218'))
             nbtn1.bind(on_press=lambda *args: self.button_screen(btn1))
             layout.add_widget(nbtn1)
         if btn2:
             if start == 1:
-                nbtn2 = Button(text=self.get_message('29116'))
+                nbtn2 = Button(text=self.get_message_by_id('29116'))
                 nbtn2.bind(on_press=lambda *args: self.button_screen(btn2, 1))
             elif start == 2:
-                nbtn2 = Button(text=self.get_message('29116'))
+                nbtn2 = Button(text=self.get_message_by_id('29116'))
                 nbtn2.bind(on_press=lambda *args: self.button_screen(btn2, 2))
             else:
-                nbtn2 = Button(text=self.get_message('6219'))
+                nbtn2 = Button(text=self.get_message_by_id('6219'))
                 nbtn2.bind(on_press=lambda *args: self.button_screen(btn2))
             layout.add_widget(nbtn2)
         if btn1 or btn2:

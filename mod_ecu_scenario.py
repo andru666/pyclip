@@ -14,7 +14,7 @@ def playScenario(command, ecu, elm):
 
     services = ecu.Services
     scenarioName, scenarioData = command.scenario.split('#')
-
+    print scenarioName
     if scenarioName.lower().startswith('scm'):
         scenarioName = scenarioName.split(':')[1]
         ecuNumberPattern = re.compile(r'_\d{5}')
@@ -29,7 +29,7 @@ def playScenario(command, ecu, elm):
         scenarioName = scenarioData[:scenarioData.find(ecuNumberIndex.group(0))].lower()
         scenarioData = 'ecudata/'+scenarioData.lower()
 
-    if scenarioName == 'scen21':
+    if scenarioName == 'scen5':
         if scenarioName.endswith('_ecu'):
             scen = __import__(scenarioName[:len(scenarioName)-4])
         elif scenarioName.endswith('_const'):

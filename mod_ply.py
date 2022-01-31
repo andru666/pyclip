@@ -4,7 +4,7 @@ sys.path.insert(0, '../..')
 sys.path.insert(0, './ply')
 import ply.lex as lex
 import ply.yacc as yacc
-import time
+import time, re
 
 class Parser():
     tokens = ()
@@ -280,7 +280,10 @@ class Calc(Parser):
         try:
             p[0] = self.names[p[1]]
         except LookupError:
-            p[0] = 0
+            if re.match('^[a-fA-F0-9]*$',p[1]) != None:
+                p[0] = p[1]
+            else:
+                p[0] = 0
 
     p_expression_name.func_doc = 'expression : NAME'
 
