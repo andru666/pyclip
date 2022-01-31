@@ -12,7 +12,7 @@
 Добавлен сценарий scen_ecri_paraminj1.py
 
 21.12.2021
-Добавлены скрипта:
+Добавлены скрипта:\n
 1 scen_ecri_fap5
 2 scen_ecri_initpente
 3 scen_ecri_counter2
