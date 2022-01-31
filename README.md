@@ -1,4 +1,7 @@
 # pyclip
+31.01.2022
+Добавлен сценарий scen_ecri_calinj4.py
+
 10.01.2022
 Добавлен сценарий scen_ecri_paraminj4.py
 
