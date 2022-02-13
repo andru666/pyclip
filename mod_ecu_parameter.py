@@ -1,4 +1,6 @@
 #Embedded file name: /build/PyCLIP/android/app/mod_ecu_parameter.py
+# -*- coding: utf-8 -*-
+
 import xml.dom.minidom
 from xml.dom.minidom import parse
 import mod_globals
@@ -13,7 +15,9 @@ def get_parameter(pr, mn, se, elm, calc, no_formatting = False, dataids = {}):
             val = get_SnapShotMnemonic(mn[m], se, elm, dataids)
         else:
             val = get_mnemonic(mn[m], se, elm)
-        if mn[m].type == 'SNUM8' and int(val, 16) > 127:
+        if pr.type=='CSTRING':
+            val = val
+        elif mn[m].type == 'SNUM8' and int(val, 16) > 127:
             val = str(int(val, 16) - 256)
         elif mn[m].type == 'SNUM16' and int(val, 16) > 32767:
             val = str(int(val, 16) - 65536)
@@ -22,11 +26,73 @@ def get_parameter(pr, mn, se, elm, calc, no_formatting = False, dataids = {}):
         else:
             val = '0x' + val
         comp = comp.replace(m, val)
-
-    pr.value = calc.calculate(comp)
+    if 'HexaToAscii' in comp:
+        pr.value = val
+    else:
+        pr.value = calc.calculate(comp)
     csv_data = unicode(pr.value) if mod_globals.opt_csv_human else pr.value
     if '.' in str(pr.value):
         pr.value = '%10.2f' % float(pr.value)
+    time = pr.value
+    if 'sec.' in str(pr):
+        s = int(time)%60
+        time = time//60
+    if 'min.' in str(pr): 
+        m = int(time)%60
+        time = time//60
+    if 'h.' in str(pr):
+        h = int(time)%60
+        time = time//24
+    if 'd.' in str(pr):
+        d = int(time)%60 
+        time = time//365
+    if 'y.' in str(pr):
+        y = int(time)%60
+    if 'sec.' in str(pr) and 'min.' in str(pr) and 'h.' in str(pr) and 'd.' in str(pr) and 'y.' in str(pr):
+        pr.value = "%s г. %s д. %s ч. %s мин. %s сек."%(y,d,h,m,s)
+        if no_formatting:
+            return (pr.name, pr.codeMR, pr.label, pr.value.decode('utf-8'), '', csv_data)
+        elif mod_globals.os=='android':
+            return "%-6s %-41s %-13s"%(pr.codeMR,pr.label,pr.value.decode('utf-8')), pr.helps, csv_data 
+        else:
+            return "%-6s %-50s %20s"%(pr.codeMR,pr.label,pr.value.decode('utf-8')), pr.helps, csv_data 
+    
+    if 'min.' in str(pr) and 'h.' in str(pr) and 'd.'    in str(pr)and 'y.' in str(pr):
+        pr.value = "%s г. %s д. %s ч. %s мин."%(y,d,h,m)
+        if no_formatting:
+            return (pr.name, pr.codeMR, pr.label, pr.value.decode('utf-8'), '', csv_data)
+        elif mod_globals.os=='android':
+            return "%-6s %-41s %-13s"%(pr.codeMR,pr.label,pr.value.decode('utf-8')), pr.helps, csv_data 
+        else:
+            return "%-6s %-50s %20s"%(pr.codeMR,pr.label,pr.value.decode('utf-8')), pr.helps, csv_data 
+    
+    if 'sec.' in str(pr) and 'min.' in str(pr) and 'h.' in str(pr) and 'd.' in str(pr):
+        pr.value = "%s д. %s ч. %s мин. %s сек."%(d,h,m,s)
+        if no_formatting:
+            return (pr.name, pr.codeMR, pr.label, pr.value.decode('utf-8'), '', csv_data)
+        elif mod_globals.os=='android':
+            return "%-6s %-41s %-13s"%(pr.codeMR,pr.label,pr.value.decode('utf-8')), pr.helps, csv_data
+        else:
+            return "%-6s %-50s %20s"%(pr.codeMR,pr.label,pr.value.decode('utf-8')), pr.helps, csv_data
+    
+    if 'min.' in str(pr) and 'h.' in str(pr) and 'd.' in str(pr):
+        pr.value = "%s д. %s ч. %s мин."%(d,h,m)
+        if no_formatting:
+            return (pr.name, pr.codeMR, pr.label, pr.value.decode('utf-8'), '', csv_data)
+        elif mod_globals.os=='android':
+            return "%-6s %-41s %-13s"%(pr.codeMR,pr.label,pr.value.decode('utf-8')), pr.helps, csv_data 
+        else:
+            return "%-6s %-50s %20s"%(pr.codeMR,pr.label,pr.value.decode('utf-8')), pr.helps, csv_data 
+    
+    if 'sec.' in str(pr) and 'min.' in str(pr) and 'h.' in str(pr):
+        pr.value = "%s ч. %s мин. %s сек."%(h,m,s)
+        if no_formatting:
+            return (pr.name, pr.codeMR, pr.label, pr.value.decode('utf-8'), '', csv_data)
+        elif mod_globals.os=='android':
+            return "%-6s %-41s %-13s"%(pr.codeMR,pr.label,pr.value.decode('utf-8')), pr.helps, csv_data 
+        else:
+            return "%-6s %-50s %20s"%(pr.codeMR,pr.label,pr.value.decode('utf-8')), pr.helps, csv_data 
+    
     tmpmin = str(pr.min)
     tmpmax = str(pr.max)
     if tmpmin.strip() == '0' and tmpmax.strip() == '0':

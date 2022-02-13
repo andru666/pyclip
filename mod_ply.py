@@ -21,7 +21,7 @@ class Parser():
 
 class Calc(Parser):
     result = ''
-    tokens = ('NAME', 'HEXSTR', 'NUMBER', 'HEX', 'FLOAT', 'PLUS', 'MINUS', 'BAND', 'EXP', 'TIMES', 'DIVIDE', 'EQUALS', 'NEQ', 'LPAREN', 'RPAREN', 'LT', 'GT', 'GE', 'LE', 'AND', 'OR', 'SHIFT', 'QUEST', 'DOTS', 'STRCONST', 'HEXTOASCII', 'HEXTOSTR', 'HEXTODEC')
+    tokens = ('NAME', 'HEXSTR', 'NUMBER', 'HEX', 'FLOAT', 'PLUS', 'MINUS', 'BAND', 'EXP', 'TIMES', 'DIVIDE', 'EQUALS', 'NEQ', 'LPAREN', 'RPAREN', 'LT', 'GT', 'GE', 'LE', 'AND', 'OR', 'SHIFT', 'QUEST', 'DOTS', 'STRCONST', 'HEXTOASCII', 'HEXTOSTR', 'HEXTODEC', 'LADAHEXTODEC')
     t_OR = '\\|\\|'
     t_AND = '\\&\\&'
     t_BAND = '\\&'
@@ -43,6 +43,11 @@ class Calc(Parser):
     t_GE = '>='
     t_STRCONST = '\\"([^\\\\\\n]|(\\\\.))*?\\"'
     t_ignore = ' \t'
+
+    def t_LADAHEXTODEC(self,t):
+        return t
+    t_LADAHEXTODEC.func_doc = '\\$LadaToDec\\$\\([a-fA-F0-9][a-fA-F0-9]*\\)'
+
 
     def t_HEXTOASCII(self, t):
         return t
@@ -231,6 +236,18 @@ class Calc(Parser):
         p[0] = tmp
 
     p_expression_HexaToDec.func_doc = 'expression : HEXTODEC'
+
+    def p_expression_LADA(self, p):
+        tmp = p[1]
+        tmp = tmp.replace("$LadaToDec$(","")
+        tmp = tmp.replace(")","")
+        tmp = tmp.replace(' ', '')
+        if len(tmp) == 4:
+            tmp = tmp[2:]+tmp[:2]
+        elif len(tmp) == 8:
+            tmp = tmp[6:]+tmp[4:6]+tmp[2:4]+tmp[:2]
+        p[0] = int(tmp, 16)
+    p_expression_LADA.func_doc='expression : LADAHEXTODEC'
 
     def p_expression_HexaToString(self, p):
         tmp = p[1]
