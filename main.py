@@ -365,14 +365,22 @@ class screenConfig(App):
         layout.add_widget(self.make_input('Font size', str(mod_globals.fontSize)))
         layout.add_widget(self.make_box_switch('KWP Force SlowInit', mod_globals.opt_si))
         layout.add_widget(self.make_box_switch('Use CFC0', mod_globals.opt_cfc0))
-        layout.add_widget(Label(text='PyClip by Marianpol 14-10-2021\nPyClip_MOD by andru666 13-02-2022', font_size=(fs,  'dp'), height=(fs,  'dp'), size_hint=(1, None)))
+        termbtn = Button(text='MACRO', height=(fs * 5,  'dp'), size_hint=(1, None), on_press=self.term)
+        layout.add_widget(termbtn)
+
+        layout.add_widget(Label(text='PyClip by Marianpol 14-10-2021\nPyClip_MOD by andru666 20-02-2022', font_size=(fs,  'dp'), height=(fs,  'dp'), size_hint=(1, None)))
         self.lay = layout
         root = ScrollView(size_hint=(1, 1), do_scroll_x=False, pos_hint={'center_x': 0.5,
          'center_y': 0.5})
         root.add_widget(layout)
         return root
 
-
+    def term(self, instance):
+        self.finish(instance)
+        from mod_term import Term
+        Term(mod_globals.opt_port, mod_globals.opt_speed, mod_globals.opt_log).test()
+        
+        
 def destroy():
     exit()
 
@@ -408,6 +416,8 @@ def main():
         os.makedirs(mod_globals.dumps_dir)
     if not os.path.exists(mod_globals.csv_dir):
         os.makedirs(mod_globals.csv_dir)
+    if not os.path.exists('./macro'):
+        os.makedirs('./macro')
     if not os.path.isfile(mod_globals.cache_dir + version_file_name):
         if os.path.isfile(os.path.join(mod_globals.user_data_dir + 'settings.p')):
             os.remove(os.path.join(mod_globals.user_data_dir + 'settings.p'))
