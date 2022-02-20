@@ -64,7 +64,28 @@ else:
     BluetoothDevice = autoclass('android.bluetooth.BluetoothDevice')
     BluetoothSocket = autoclass('android.bluetooth.BluetoothSocket')
     UUID = autoclass('java.util.UUID')
-
+if mod_globals.os == 'android':
+    try:
+        from jnius import autoclass
+        import glob
+        AndroidPythonActivity = autoclass('org.renpy.android.PythonActivity')
+        PythonActivity = autoclass('org.renpy.android.PythonActivity')
+        AndroidActivityInfo = autoclass('android.content.pm.ActivityInfo')
+        Environment = autoclass('android.os.Environment')
+        Params = autoclass('android.view.WindowManager$LayoutParams')
+        user_datadir = Environment.getExternalStorageDirectory().getAbsolutePath() + '/pyren/'
+        mod_globals.user_data_dir = user_datadir
+        mod_globals.cache_dir = user_datadir + '/cache/'
+        mod_globals.log_dir = user_datadir + '/logs/'
+        mod_globals.dumps_dir = user_datadir + '/dumps/'
+        mod_globals.csv_dir = user_datadir + '/csv/'
+    except:
+        mod_globals.ecu_root = '../'
+        try:
+            import serial
+            from serial.tools import list_ports
+        except:
+            pass
 class Term():
     def __init__(self, opt_port, opt_speed, opt_log):
         self.opt_port = opt_port
@@ -87,29 +108,11 @@ class MyApp(App):
         super(MyApp, self).__init__()
     
     def build(self):
+
+        
         Clock.schedule_once(self.select_macro, 1)
-        try:
-            elm = mod_elm.ELM(mod_globals.opt_port, mod_globals.opt_speed, True)
-        except:
-            labelText = '''
-                Could not connect to the ELM.
-
-                Possible causes:
-                - Bluetooth is not enabled
-                - other applications are connected to your ELM e.g Torque
-                - other device is using this ELM
-                - ELM got unpaired
-                - ELM is read under new name or it changed its name
-
-                Check your ELM connection and try again.
-            '''
-            lbltxt = Label(text=labelText, font_size=mod_globals.fontSize)
-            popup_load = Popup(title='ELM connection error', content=lbltxt, size=(800, 800), auto_dismiss=True, on_dismiss=exit)
-            popup_load.open()
-            base.runTouchApp()
-            return
-        self.label = Label(text='')
-        self.btnc = Button()
+        
+        self.label = Label(text='', font_size=(fs,  'dp'), size_hint=(1, None), height=(fs*1.5,  'dp'))
         self.roots = GridLayout(cols=1, padding=fs, spacing=fs, size_hint=(1, None))
         self.roots.bind(minimum_height=self.roots.setter('height'))
         self.roots.add_widget(Label(text='Running macro', font_size=(fs,  'dp'), bgcolor=(0, 0, 1, 0.3)))
@@ -139,7 +142,7 @@ class MyApp(App):
     
     def exits(self, instance):
         mod_globals.opt_log = self.orig_log
-        elm = mod_elm.ELM(mod_globals.opt_port, mod_globals.opt_speed, True)
+        elm = mod_elm.ELM(mod_globals.opt_port, mod_globals.opt_speed, mod_globals.opt_log)
         exit(1)
     
     def macro_start(self, instance):
@@ -152,9 +155,29 @@ class MyApp(App):
             self.MaLabel('Not select macro')
             self.roots.add_widget(Button(text='CLOSE', size_hint=(1, None), height=(fs*5,  'dp'), on_release=self.exits))
             return 
-        self.MaLabel('File macro select: ' + file_macro)
+        self.label.text = str('File macro select: ' + file_macro)
         mod_globals.opt_log = file_macro.replace('.cmd', '.txt')
-        self.elm = mod_elm.ELM(mod_globals.opt_port, mod_globals.opt_speed, True)
+        try:
+            self.elm = mod_elm.ELM(mod_globals.opt_port, mod_globals.opt_speed, mod_globals.opt_log)
+        except:
+            labelText = '''
+                Could not connect to the ELM.
+
+                Possible causes:
+                - Bluetooth is not enabled
+                - other applications are connected to your ELM e.g Torque
+                - other device is using this ELM
+                - ELM got unpaired
+                - ELM is read under new name or it changed its name
+
+                Check your ELM connection and try again.
+            '''
+            lbltxt = Label(text=labelText, font_size=mod_globals.fontSize)
+            popup_load = Popup(title='ELM connection error', content=lbltxt, size=(800, 800), auto_dismiss=True, on_dismiss=exit)
+            popup_load.open()
+            base.runTouchApp()
+            return
+        
         global auto_macro
         global auto_dia
         global debug_mode
@@ -228,7 +251,6 @@ class MyApp(App):
                     c_str += 1
         self.roots.add_widget(Button(text='CLOSE', size_hint=(1, None), height=(fs*5,  'dp'), on_release=self.exits))
         
-
     def open_pop(self, instance):
         lbltxt = Label(text=instance)
         popup_load = Popup(title='ELM connection error', content=lbltxt, size=(800, 800), auto_dismiss=True)

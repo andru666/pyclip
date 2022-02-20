@@ -367,7 +367,7 @@ class screenConfig(App):
         layout.add_widget(self.make_box_switch('Use CFC0', mod_globals.opt_cfc0))
         termbtn = Button(text='MACRO', height=(fs * 5,  'dp'), size_hint=(1, None), on_press=self.term)
         layout.add_widget(termbtn)
-
+        
         layout.add_widget(Label(text='PyClip by Marianpol 14-10-2021\nPyClip_MOD by andru666 20-02-2022', font_size=(fs,  'dp'), height=(fs,  'dp'), size_hint=(1, None)))
         self.lay = layout
         root = ScrollView(size_hint=(1, 1), do_scroll_x=False, pos_hint={'center_x': 0.5,
@@ -388,8 +388,8 @@ def destroy():
 def kivyScreenConfig():
     global resizeFont
     if mod_globals.os != 'android':
-        if Window.size[0]>Window.size[1]: ws = Window.size[0]/Window.size[1]*1.2
-        else: ws = Window.size[1]/Window.size[0]*1.2
+        if Window.size[0]>Window.size[1]: ws = Window.size[0]/Window.size[1]*1.1
+        else: ws = Window.size[1]/Window.size[0]*1.1
         Window.size = (Window.size[0], Window.size[1]*ws)
     else:
         if not mod_globals.screen_orient:
