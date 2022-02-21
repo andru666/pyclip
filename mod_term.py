@@ -19,6 +19,7 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.dropdown import DropDown
 from kivy.uix.switch import Switch
+from kivy.graphics import Color, Rectangle
 from kivy.uix.textinput import TextInput
 from kivy.uix.popup import Popup
 from kivy import base
@@ -86,6 +87,43 @@ if mod_globals.os == 'android':
             from serial.tools import list_ports
         except:
             pass
+
+class MyLabel(Label):
+
+    def __init__(self, **kwargs):
+        if 'bgcolor' in kwargs:
+            self.bgcolor = kwargs['bgcolor']
+        else:
+            self.bgcolor = (0, 0, 0, 0)
+        super(MyLabel, self).__init__(**kwargs)
+        self.bind(size=self.setter('text_size'))
+        self.halign = 'center'
+        self.valign = 'middle'
+        if 'size_hint' not in kwargs:
+            self.size_hint = (1, None)
+        if 'height' not in kwargs:
+            fmn = 1.1
+            lines = len(self.text.split('\n'))
+            simb = len(self.text) / 60
+            if lines < simb: lines = simb
+            if lines < 7: lines = 5
+            if lines > 20: lines = 15
+            if 1 > simb: lines = 1.5
+            if fs > 20: 
+                lines = lines * 1.05
+                fmn = 1.5
+            self.height = fmn * lines * fs
+        
+
+    
+    def on_size(self, *args):
+        if not self.canvas:
+            return
+        self.canvas.before.clear()
+        with self.canvas.before:
+            Color(self.bgcolor[0], self.bgcolor[1], self.bgcolor[2], self.bgcolor[3])
+            Rectangle(pos=self.pos, size=self.size)
+
 class Term():
     def __init__(self, opt_port, opt_speed, opt_log):
         self.opt_port = opt_port
@@ -104,18 +142,16 @@ class MyApp(App):
         mod_globals.opt_log = opt_log
         self.orig_log = mod_globals.opt_log
         self.dir_macro = os.path.join(mod_globals.user_data_dir, 'macro')
-        
         super(MyApp, self).__init__()
     
     def build(self):
 
-        
         Clock.schedule_once(self.select_macro, 1)
         
-        self.label = Label(text='', font_size=(fs,  'dp'), size_hint=(1, None), height=(fs*1.5,  'dp'))
-        self.roots = GridLayout(cols=1, padding=fs, spacing=fs, size_hint=(1, None))
+        self.label = Label(text='', bgcolor=(1, 1, 0, 0.3), font_size=(fs,  'dp'), size_hint=(1, None), height=(fs*1.5,  'dp'))
+        self.roots = GridLayout(cols=1, padding=fs*1.5, spacing=fs*1.5, size_hint=(1, None), size_hint_y=None)
         self.roots.bind(minimum_height=self.roots.setter('height'))
-        self.roots.add_widget(Label(text='Running macro', font_size=(fs,  'dp'), bgcolor=(0, 0, 1, 0.3)))
+        self.roots.add_widget(Label(text='Running macro', font_size=(fs,  'dp'), bgcolor=(1, 1, 0, 0.3)))
         self.roots.add_widget(self.label)
         layout = ScrollView(size_hint=(1, 1), do_scroll_x=False, pos_hint={'center_x': 0.5,'center_y': 0.5})
         layout.add_widget(self.roots)
@@ -123,8 +159,10 @@ class MyApp(App):
         return layout
     
     def MaLabel(self, text):
-        label = Label(text=str(text), font_size=(fs,  'dp'), size_hint=(1, None), height=(fs*1.5,  'dp'))
-        self.roots.add_widget(label)
+        layout_current = BoxLayout(orientation='vertical', size_hint=(1, 1))
+        label = Label(text=str(text))
+        layout_current.add_widget(label)
+        self.roots.add_widget(layout_current)
     
     def select_macro(self, instance):
         root = GridLayout(cols=1, size_hint=(1, 1))
@@ -133,7 +171,6 @@ class MyApp(App):
         root.add_widget(self.fichoo)
         root.add_widget(Button(text='Open', on_release=self.popp, size_hint=(1, None)))
         self.popup_macro = Popup(title='SELECT macro', font_size=(fs,  'dp'), content=root, size=(600, 600), auto_dismiss=True)
-        self.popup_macro.background_color = 0.5, 0.75, 0, 0.75
         self.popup_macro.open()
 
     def popp(self, instance):
@@ -141,8 +178,8 @@ class MyApp(App):
         Clock.schedule_once(self.macro_start, 1)
     
     def exits(self, instance):
+        print self.orig_log
         mod_globals.opt_log = self.orig_log
-        elm = mod_elm.ELM(mod_globals.opt_port, mod_globals.opt_speed, mod_globals.opt_log)
         exit(1)
     
     def macro_start(self, instance):
@@ -184,7 +221,6 @@ class MyApp(App):
         global macro
         global var
         self.init_macro()
-    
         self.init_var()
         self.load_macro()
         
@@ -192,10 +228,10 @@ class MyApp(App):
         
         auto_dia = True
         
-        if not mod_globals.opt_demo and self.elm.port and self.elm.port.portType==0:
+        """if not mod_globals.opt_demo and self.elm.port:
             #self.elm.port.check_elm()
             if mod_globals.opt_speed < mod_globals.opt_rate:
-                self.elm.port.soft_boudrate(mod_globals.opt_rate)
+                self.elm.port.soft_boudrate(mod_globals.opt_rate)"""
         
         self.elm.currentaddress = '7A'
         self.elm.currentprotocol = 'can'
@@ -222,9 +258,10 @@ class MyApp(App):
             else:
                 self.popup = Popup(title='ERROR', content=Label(text=str('Error: unknown macro name: ' + auto_macro)), size=(400, 400), size_hint=(None, None), auto_dismiss=True)
                 self.popup.open()
-        
+
         while self.macros:
-            self.MaLabel(var['$addr']+':'+var['$txa']+':'+var['$prompt'] + '#')
+            label = Label(text=str(var['$addr']+':'+var['$txa']+':'+var['$prompt'] + '#'), bgcolor=(0, 1, 0, 0.3), font_size=(fs,  'dp'), size_hint=(1, None), height=(fs*1.5,  'dp'))
+            #self.roots.add_widget(label)
             
             if len(cmd_lines)==0:
                 l = raw_input().lower()
@@ -236,7 +273,7 @@ class MyApp(App):
                     cmd_lines = []
                     l = "# end of command file"
                     self.macros = False
-                self.MaLabel(l)
+                #if l != '': label.text += str(l)
                 
             
             goto = self.proc_line(l, self.elm)
@@ -271,6 +308,7 @@ class MyApp(App):
     def pars_macro(self, file):
         global macro
         global var
+        self.MaLabel('openning file: ' + file)
         with open(file, 'rt') as f:
             lines = f.readlines()
         macro = {}
@@ -324,10 +362,10 @@ class MyApp(App):
 
     def load_macro(self, mf=''):
         if mf=='' :
-            for root, dirs, files in os.walk("./macro"):
+            for root, dirs, files in os.walk(self.dir_macro):
                 for mfile in files:
                     if mfile.endswith('.txt'):
-                        full_path = os.path.join("./macro/", mfile)
+                        full_path = os.path.join(mod_globals.user_data_dir, os.path.join("macro", mfile))
                         return self.pars_macro(full_path)
         else:
             return self.pars_macro(mf) 
@@ -604,6 +642,7 @@ class MyApp(App):
 
         if l in ['q', 'quit', 'e', 'exit', 'end']:
             self.macros = False
+            return
 
         if l in ['cls']:
             mod_utils.clearScreen()
