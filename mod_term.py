@@ -178,7 +178,7 @@ class MyApp(App):
         Clock.schedule_once(self.macro_start, 1)
     
     def exits(self, instance):
-        print self.orig_log
+        mod_globals.opt_cfc0 = False
         mod_globals.opt_log = self.orig_log
         exit(1)
     
@@ -260,9 +260,11 @@ class MyApp(App):
                 self.popup.open()
 
         while self.macros:
-            label = Label(text=str(var['$addr']+':'+var['$txa']+':'+var['$prompt'] + '#'), bgcolor=(0, 1, 0, 0.3), font_size=(fs,  'dp'), size_hint=(1, None), height=(fs*1.5,  'dp'))
-            #self.roots.add_widget(label)
-            
+            layout_current = BoxLayout(orientation='vertical', size_hint=(1, 1))
+            label = Label(text=str(var['$addr']+':'+var['$txa']+':'+var['$prompt'] + '#'))
+            layout_current.add_widget(label)
+            self.roots.add_widget(layout_current)
+        
             if len(cmd_lines)==0:
                 l = raw_input().lower()
             else:
@@ -273,8 +275,7 @@ class MyApp(App):
                     cmd_lines = []
                     l = "# end of command file"
                     self.macros = False
-                #if l != '': label.text += str(l)
-                
+                if l != '': label.text += str(l)
             
             goto = self.proc_line(l, self.elm)
 
@@ -641,6 +642,7 @@ class MyApp(App):
             return
 
         if l in ['q', 'quit', 'e', 'exit', 'end']:
+            mod_globals.opt_log = self.orig_log
             self.macros = False
             return
 
@@ -732,7 +734,6 @@ class MyApp(App):
 
         if len(l_parts) > 0 and l_parts[0] in ['go','goto']:
             self.MaLabel(l)
-            
             return l_parts[1]
 
         if len(l_parts) > 0 and l_parts[0] in ['var','variable']:
