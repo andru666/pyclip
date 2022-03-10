@@ -27,12 +27,8 @@ from kivy.lang import Builder
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.filechooser import FileChooserListView
 from kivy.clock import Clock
-import sys, os, re
-import string
-import time
-import mod_globals
-import mod_elm
-import mod_utils
+import sys, os, re, string, time, mod_globals, mod_elm, mod_utils, main
+
 if int(Window.size[1]) > int(Window.size[0]):
     fs = int(Window.size[1])/(int(Window.size[0])/9)
 else:
@@ -55,6 +51,7 @@ key_pressed = ''
 mod_globals.os = platform
 
 mod_globals.opt_demo = False
+
 if mod_globals.os != 'android':
     import serial
     from serial.tools import list_ports
@@ -65,6 +62,7 @@ else:
     BluetoothDevice = autoclass('android.bluetooth.BluetoothDevice')
     BluetoothSocket = autoclass('android.bluetooth.BluetoothSocket')
     UUID = autoclass('java.util.UUID')
+
 if mod_globals.os == 'android':
     try:
         from jnius import autoclass
@@ -102,7 +100,7 @@ class MyLabel(Label):
         if 'size_hint' not in kwargs:
             self.size_hint = (1, None)
         if 'height' not in kwargs:
-            fmn = 1.1
+            fmn = 1.5
             lines = len(self.text.split('\n'))
             simb = len(self.text) / 60
             if lines < simb: lines = simb
@@ -111,7 +109,10 @@ class MyLabel(Label):
             if 1 > simb: lines = 1.5
             if fs > 20: 
                 lines = lines * 1.05
-                fmn = 1.5
+                fmn = 1.7
+            if not lines: lines = 1
+            if len(self.text) > 20: lines = lines * 1.5
+            if len(self.text) > 30: lines = lines * 2
             self.height = fmn * lines * fs
         
 
@@ -148,10 +149,10 @@ class MyApp(App):
 
         Clock.schedule_once(self.select_macro, 1)
         
-        self.label = Label(text='', bgcolor=(1, 1, 0, 0.3), font_size=(fs,  'dp'), size_hint=(1, None), height=(fs*1.5,  'dp'))
+        self.label = MyLabel(text='', bgcolor=(1, 1, 0, 0.3), font_size=(fs,  'dp'), size_hint=(1, None), height=(fs*1.5,  'dp'))
         self.roots = GridLayout(cols=1, padding=fs*1.5, spacing=fs*1.5, size_hint=(1, None), size_hint_y=None)
         self.roots.bind(minimum_height=self.roots.setter('height'))
-        self.roots.add_widget(Label(text='Running macro', font_size=(fs,  'dp'), bgcolor=(1, 1, 0, 0.3)))
+        self.roots.add_widget(MyLabel(text='Running macro', font_size=(fs,  'dp'), bgcolor=(1, 1, 0, 0.3)))
         self.roots.add_widget(self.label)
         layout = ScrollView(size_hint=(1, 1), do_scroll_x=False, pos_hint={'center_x': 0.5,'center_y': 0.5})
         layout.add_widget(self.roots)
@@ -159,14 +160,12 @@ class MyApp(App):
         return layout
     
     def MaLabel(self, text):
-        layout_current = BoxLayout(orientation='vertical', size_hint=(1, 1))
-        label = Label(text=str(text))
-        layout_current.add_widget(label)
-        self.roots.add_widget(layout_current)
+        label = MyLabel(text=str(text), bgcolor=(0.5,0.5,0,1))
+        self.roots.add_widget(label)
     
     def select_macro(self, instance):
         root = GridLayout(cols=1, size_hint=(1, 1))
-        root.add_widget(Label(text='header', size_hint=(1, None)))
+        root.add_widget(MyLabel(text='header', size_hint=(1, None)))
         self.fichoo = FileChooserListView(path=self.dir_macro)
         root.add_widget(self.fichoo)
         root.add_widget(Button(text='Open', on_release=self.popp, size_hint=(1, None)))
@@ -180,7 +179,8 @@ class MyApp(App):
     def exits(self, instance):
         mod_globals.opt_cfc0 = False
         mod_globals.opt_log = self.orig_log
-        exit(1)
+        self.stop()
+        main.kivyScreenConfig()
     
     def macro_start(self, instance):
         try:
@@ -197,6 +197,8 @@ class MyApp(App):
         try:
             self.elm = mod_elm.ELM(mod_globals.opt_port, mod_globals.opt_speed, mod_globals.opt_log)
         except:
+            self.stop()
+            root = GridLayout(cols=1, size_hint=(1, 1))
             labelText = '''
                 Could not connect to the ELM.
 
@@ -210,7 +212,9 @@ class MyApp(App):
                 Check your ELM connection and try again.
             '''
             lbltxt = Label(text=labelText, font_size=mod_globals.fontSize)
-            popup_load = Popup(title='ELM connection error', content=lbltxt, size=(800, 800), auto_dismiss=True, on_dismiss=exit)
+            root.add_widget(lbltxt)
+            root.add_widget(Button(text='CLOSE', size_hint=(1, None), height=(fs*5,  'dp'), on_release=self.exits))
+            popup_load = Popup(title='ELM connection error', content=root, size=(800, 800), auto_dismiss=True)
             popup_load.open()
             base.runTouchApp()
             return
@@ -256,15 +260,13 @@ class MyApp(App):
             if auto_macro in macro.keys():
                 self.play_macro(auto_macro, self.elm)
             else:
-                self.popup = Popup(title='ERROR', content=Label(text=str('Error: unknown macro name: ' + auto_macro)), size=(400, 400), size_hint=(None, None), auto_dismiss=True)
+                self.popup = Popup(title='ERROR', content=MyLabel(text=str('Error: unknown macro name: ' + auto_macro)), size=(400, 400), size_hint=(None, None), auto_dismiss=True)
                 self.popup.open()
 
         while self.macros:
-            layout_current = BoxLayout(orientation='vertical', size_hint=(1, 1))
-            label = Label(text=str(var['$addr']+':'+var['$txa']+':'+var['$prompt'] + '#'))
-            layout_current.add_widget(label)
-            self.roots.add_widget(layout_current)
-        
+            label = MyLabel(text=str(var['$addr']+':'+var['$txa']+':'+var['$prompt'] + '#'), bgcolor=(0.5,0.5,0,1))
+            self.roots.add_widget(label)
+            
             if len(cmd_lines)==0:
                 l = raw_input().lower()
             else:
@@ -276,6 +278,7 @@ class MyApp(App):
                     l = "# end of command file"
                     self.macros = False
                 if l != '': label.text += str(l)
+                
             
             goto = self.proc_line(l, self.elm)
 
@@ -290,7 +293,7 @@ class MyApp(App):
         self.roots.add_widget(Button(text='CLOSE', size_hint=(1, None), height=(fs*5,  'dp'), on_release=self.exits))
         
     def open_pop(self, instance):
-        lbltxt = Label(text=instance)
+        lbltxt = MyLabel(text=instance)
         popup_load = Popup(title='ELM connection error', content=lbltxt, size=(800, 800), auto_dismiss=True)
         popup_load.open()
     
@@ -612,14 +615,11 @@ class MyApp(App):
     def wait_kb(self, ttw):
         global key_pressed
         st = time.time()
-        kb = mod_utils.KBHit()
 
         while(time.time()<(st+ttw)):
-            if kb.kbhit():
-                key_pressed = kb.getch()
+            #key_pressed = kb.getch()
             time.sleep(0.1)
 
-        kb.set_normal_term()
 
     def proc_line(self, l, elm):
         
@@ -749,5 +749,5 @@ class MyApp(App):
             
 
         if cmd_delay>0:
-            self.MaLabel('# delay: '+cmd_delay)
-            
+            self.MaLabel('# delay: '+str(cmd_delay))
+            self.wait_kb(cmd_delay)

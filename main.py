@@ -53,6 +53,7 @@ if mod_globals.os == 'android':
         mod_globals.cache_dir = user_datadir + '/cache/'
         mod_globals.log_dir = user_datadir + '/logs/'
         mod_globals.dumps_dir = user_datadir + '/dumps/'
+        mod_globals.macro_dir = user_datadir + '/macro/'
         mod_globals.csv_dir = user_datadir + '/csv/'
     except:
         mod_globals.ecu_root = '../'
@@ -348,6 +349,8 @@ class screenConfig(App):
         except:
             self.archive = str(mod_globals.db_archive_file).rpartition('\\')[2]
         layout.add_widget(Label(text='DB archive : ' + self.archive, font_size=(fs*0.9,  'dp'), height=(fs,  'dp'), multiline=True, size_hint=(1, None)))
+        termbtn = Button(text='MACRO', height=(fs * 5,  'dp'), size_hint=(1, None), on_press=self.term)
+        check = Button(text='Check ELM327', height=(fs * 5,  'dp'), size_hint=(1, None), on_press=self.check_elm)
         gobtn = Button(text='START', height=(fs * 5,  'dp'), size_hint=(1, None), on_press=self.finish)
         layout.add_widget(gobtn)
         layout.add_widget(self.make_opt_ecuid())
@@ -365,10 +368,9 @@ class screenConfig(App):
         layout.add_widget(self.make_input('Font size', str(mod_globals.fontSize)))
         layout.add_widget(self.make_box_switch('KWP Force SlowInit', mod_globals.opt_si))
         layout.add_widget(self.make_box_switch('Use CFC0', mod_globals.opt_cfc0))
-        termbtn = Button(text='MACRO', height=(fs * 5,  'dp'), size_hint=(1, None), on_press=self.term)
         layout.add_widget(termbtn)
         
-        layout.add_widget(Label(text='PyClip by Marianpol 14-10-2021\nPyClip_MOD by andru666 20-02-2022', font_size=(fs,  'dp'), height=(fs,  'dp'), size_hint=(1, None)))
+        layout.add_widget(Label(text='PyClip by Marianpol 14-10-2021\nPyClip_MOD by andru666 10-03-2022', font_size=(fs,  'dp'), height=(fs,  'dp'), size_hint=(1, None)))
         self.lay = layout
         root = ScrollView(size_hint=(1, 1), do_scroll_x=False, pos_hint={'center_x': 0.5,
          'center_y': 0.5})
@@ -379,18 +381,27 @@ class screenConfig(App):
         self.finish(instance)
         from mod_term import Term
         Term(mod_globals.opt_port, mod_globals.opt_speed, mod_globals.opt_log).test()
-        
+
+    def check_elm(self, instance):
+        self.finish(instance)
+        from cmdr_chkelm import CHECK
+        CHECK()
         
 def destroy():
     exit()
 
-
 def kivyScreenConfig():
     global resizeFont
     if mod_globals.os != 'android':
-        if Window.size[0]>Window.size[1]: ws = Window.size[0]/Window.size[1]*1.1
-        else: ws = Window.size[1]/Window.size[0]*1.1
-        Window.size = (Window.size[0], Window.size[1]*ws)
+        if Window.size[0]>Window.size[1]:
+            ws = Window.size[0]/Window.size[1]/1.2
+            height = Window.size[1]/ws
+            width = height/1.2
+        else:
+            ws = (Window.size[1]/Window.size[0])/1.2
+            height = Window.size[1]/ws
+            width = height/1.2
+        Window.size = (width, height)
     else:
         if not mod_globals.screen_orient:
             set_orientation_portrait()
@@ -416,11 +427,18 @@ def main():
         os.makedirs(mod_globals.dumps_dir)
     if not os.path.exists(mod_globals.csv_dir):
         os.makedirs(mod_globals.csv_dir)
-    if not os.path.exists('./macro'):
-        os.makedirs('./macro')
+    if not os.path.exists(mod_globals.macro_dir):
+        os.makedirs(mod_globals.macro_dir)
     if not os.path.isfile(mod_globals.cache_dir + version_file_name):
         if os.path.isfile(os.path.join(mod_globals.user_data_dir + 'settings.p')):
             os.remove(os.path.join(mod_globals.user_data_dir + 'settings.p'))
+    import glob
+    zip_macro = sorted(glob.glob(os.path.join('./', 'macro.zip')), reverse=True)
+    if len(zip_macro):
+        import zipfile
+        with zipfile.ZipFile(zip_macro[0], 'r') as zip_file:
+            zip_file.extractall(os.path.join(mod_globals.user_data_dir, 'macro'))
+    
     settings = mod_globals.Settings()
     kivyScreenConfig()
     settings.save()
